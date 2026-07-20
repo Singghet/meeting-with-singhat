@@ -69,10 +69,10 @@
     .bubble-stage.active .bubble{animation:bubbleFloat 3.5s cubic-bezier(.2,.7,.25,1) var(--delay) both}
     @keyframes bubbleFloat{0%{opacity:0;transform:translate(-50%,-18%) scale(.86) rotate(var(--rotate))}16%,70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-82%) scale(.96) rotate(var(--rotate))}}
     .bubble.cloud{border-radius:24px 24px 24px 9px;box-shadow:0 12px 34px rgba(71,101,117,.13),10px 8px 0 rgba(255,255,255,.4)}
-    .bubble.raven{display:flex;align-items:center;gap:8px;border:0;background:rgba(54,65,74,.9);color:#fff;box-shadow:0 12px 32px rgba(40,53,61,.18)}
-    .bubble.raven strong{color:#cde4ef}.raven-icon{font-size:26px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.2))}
-    .bubble-stage.active .bubble.raven{animation:ravenFly 3.5s ease-out var(--delay) both}
-    @keyframes ravenFly{0%{opacity:0;transform:translate(-90%,-25%) rotate(-4deg)}16%,68%{opacity:1;transform:translate(-50%,-50%) rotate(1deg)}100%{opacity:0;transform:translate(15%,-70%) rotate(4deg)}}
+    .bubble.sticker{display:flex;align-items:center;gap:8px;border:1px dashed hsla(var(--sticker-hue),55%,48%,.4);border-radius:10px;background:hsla(var(--sticker-hue),75%,96%,.95);color:hsl(var(--sticker-hue),35%,30%);box-shadow:4px 5px 0 hsla(var(--sticker-hue),55%,52%,.13)}
+    .bubble.sticker strong{color:hsl(var(--sticker-hue),45%,38%)}.sticker-icon{font-size:26px;filter:drop-shadow(0 3px 4px rgba(65,78,87,.16))}
+    .bubble-stage.active .bubble.sticker{animation:stickerDrop 3.5s cubic-bezier(.2,.8,.25,1.08) var(--delay) both}
+    @keyframes stickerDrop{0%{opacity:0;transform:translate(-50%,-80%) scale(.72) rotate(calc(var(--rotate) - 7deg))}18%,68%{opacity:1;transform:translate(-50%,-50%) scale(1.03) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-28%) scale(.92) rotate(calc(var(--rotate) + 4deg))}}
     .bubble.emoji{display:flex;align-items:center;gap:8px;border:0;background:rgba(255,255,255,.83);border-radius:30px;box-shadow:0 10px 30px rgba(111,128,138,.14)}
     .reaction-emoji{font-size:29px;line-height:1;filter:drop-shadow(0 3px 5px rgba(65,78,87,.12))}
     .bubble-stage.active .bubble.emoji{animation:emojiPop 3.5s cubic-bezier(.18,.8,.25,1.12) var(--delay) both}
@@ -81,6 +81,7 @@
     .ending .icon{font-size:44px;margin-bottom:12px}
     .ending h2{margin:0 0 10px;font:500 32px/1.25 Georgia,"Songti SC",serif}
     .ending p{margin:6px 0;color:var(--muted);line-height:1.7}
+    .calendar-hint{display:none}
     .modal{position:fixed;inset:0;z-index:10;display:none;place-items:center;padding:20px;background:rgba(52,47,41,.38);backdrop-filter:blur(7px)}
     .modal.show{display:grid}
     .dialog{width:min(100%,410px);padding:25px;border:1px solid rgba(255,255,255,.65);border-radius:23px;background:var(--paper);box-shadow:0 24px 75px rgba(45,37,31,.23);animation:pop .24s ease}
@@ -158,8 +159,9 @@
       .bubble-stage{inset:104px 6px 54px;overflow:visible}
       .bubble{width:max-content;max-width:calc(100% - 22px);padding:10px 13px;font-size:13px;line-height:1.42}
       .bubble strong{font-size:11px}
-      .bubble.raven,.bubble.emoji{gap:6px}
-      .raven-icon,.reaction-emoji{font-size:23px}
+      .bubble.sticker,.bubble.emoji{gap:6px}
+      .sticker-icon,.reaction-emoji{font-size:23px}
+      .ending .calendar-hint{display:block;margin:14px 0 2px;padding:11px 12px;border-left:2px solid rgba(84,124,148,.34);color:#738590;font-size:12px;line-height:1.65}
       .steam{display:none}
     }
     @media(pointer:coarse),(prefers-reduced-motion:reduce){.cursor-orb{display:none}.char,.scene.active{animation-duration:.01ms!important}.option,.time-choice,.primary{transform:none!important}}
@@ -252,6 +254,7 @@
           <p>点一下，把这天存进日历。</p>
           <p id="hostPlaceEnding" class="hidden">地点我来选，选好告诉您。</p>
           <button class="primary" id="downloadIcs">下载日程 .ics</button>
+          <p class="calendar-hint">手机小提示：微信里若没有直接跳到日历，先保存到“文件”，再点开 .ics；能选择“日历”时直接选它就好。</p>
           <button class="quiet" onclick="location.reload()">再看一遍</button>
         </div>
       </section>
@@ -353,8 +356,9 @@
       '午夜':[['S｜紫老头','小酌加散步？这个时间认真的吗？'],['Z','月亮都上班了，我们为什么不能'],['日历本人','这已经不是咖啡局了吧']],
       '待定':[['S','您这是把悬念也算进流程了'],['Z','给未来一点临场发挥'],['本次行程甲方','很好，谁都没有真正做决定']]
     };
-    const bubbleVariants=['cloud','raven','emoji'];
+    const bubbleVariants=['cloud','sticker','emoji'];
     const reactionEmojis=['🫧','👀','☕️','🤨','✨','🫠','😌','🌙'];
+    const stickerIcons=['🪩','🥂','🛸','🎭','🧠','🌝','🫡','🧭'];
     let hoverTimer,bubbleTimer,hasPlayedTimeComment=false;
     function shuffle(items){return [...items].sort(()=>Math.random()-.5)}
     function randomPosition(index){
@@ -372,8 +376,8 @@
       const variants=shuffle(bubbleVariants);
       timeComments[slot].forEach(([speaker,text],index)=>{
         const variant=variants[index],bubble=document.createElement('div'); bubble.className=`bubble ${variant}`;
-        const [x,y,delay,rotate]=randomPosition(index); bubble.style.cssText=`--x:${x};--y:${y};--delay:${delay};--rotate:${rotate}`;
-        if(variant==='raven')bubble.innerHTML=`<span class="raven-icon">🐦‍⬛</span><span><strong>${speaker}：</strong>${text}</span>`;
+        const [x,y,delay,rotate]=randomPosition(index); bubble.style.cssText=`--x:${x};--y:${y};--delay:${delay};--rotate:${rotate};--sticker-hue:${Math.floor(Math.random()*320)}`;
+        if(variant==='sticker')bubble.innerHTML=`<span class="sticker-icon">${stickerIcons[Math.floor(Math.random()*stickerIcons.length)]}</span><span><strong>${speaker}：</strong>${text}</span>`;
         else if(variant==='emoji')bubble.innerHTML=`<span class="reaction-emoji">${reactionEmojis[Math.floor(Math.random()*reactionEmojis.length)]}</span><span><strong>${speaker}：</strong>${text}</span>`;
         else bubble.innerHTML=`<strong>${speaker}：</strong>${text}`;
         stage.appendChild(bubble);
