@@ -382,13 +382,21 @@
       hasPlayedTimeComment=true; document.getElementById('timeOptions').classList.add('fast');
       clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>{stage.classList.remove('active');stage.innerHTML=''},3900);
     }
+    const canHoverTimeChoices=matchMedia('(hover:hover) and (pointer:fine)').matches;
     document.querySelectorAll('.time-choice').forEach(button=>{
-      button.addEventListener('mouseenter',()=>{clearTimeout(hoverTimer);hoverTimer=setTimeout(()=>showBubbles(button.dataset.time),hasPlayedTimeComment?800:1000)});
-      button.addEventListener('mouseleave',()=>clearTimeout(hoverTimer));
+      button.addEventListener('mouseenter',()=>{
+        if(!canHoverTimeChoices)return;
+        clearTimeout(hoverTimer);
+        hoverTimer=setTimeout(()=>showBubbles(button.dataset.time),hasPlayedTimeComment?800:1000);
+      });
+      button.addEventListener('mouseleave',()=>{
+        if(canHoverTimeChoices)clearTimeout(hoverTimer);
+      });
       button.addEventListener('click',()=>{
+        clearTimeout(hoverTimer);
         state.time=button.dataset.time;
         document.querySelectorAll('.time-choice').forEach(item=>item.classList.toggle('active',item===button));
-        if(matchMedia('(hover:none)').matches)showBubbles(button.dataset.time);
+        if(!canHoverTimeChoices)showBubbles(button.dataset.time);
       });
     });
     document.getElementById('saveTime').onclick=()=>{
