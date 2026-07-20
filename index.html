@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f2eee5">
+  <title>想和您约杯咖啡</title>
+  <style>
+    :root {
+      --canvas:#eff8fc; --paper:#fbfdfe; --ink:#35404a; --muted:#7b8790;
+      --line:#d8e5eb; --clay:#789eb5; --clay-dark:#547c94; --sage:#83a6b3;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--canvas)}
+    body{--bg-a:#eaf6fb;--bg-b:#f8fcfd;--card:rgba(251,253,254,.92);margin:0;min-height:100vh;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(145deg,var(--bg-a) 0%,var(--bg-b) 52%,#eef7fa 100%);transition:background 1.1s ease}
+    body[data-step="1"]{--bg-a:#edf6fb;--bg-b:#fafbfd;--card:rgba(252,253,254,.93)}
+    body[data-step="2"]{--bg-a:#f0f5fa;--bg-b:#fbf9fc;--card:rgba(253,252,254,.93)}
+    body[data-step="3"]{--bg-a:#f4f3f8;--bg-b:#fcf7fa;--card:rgba(254,251,253,.94)}
+    body[data-step="4"]{--bg-a:#f8f1f5;--bg-b:#fff7f9;--card:rgba(255,250,252,.95)}
+    body[data-step="5"]{--bg-a:#fbeff3;--bg-b:#fff8fa;--card:rgba(255,250,252,.96)}
+    body[data-step="6"]{--bg-a:#edf6f8;--bg-b:#f8fbfc;--card:rgba(251,253,254,.95)}
+    button,input,select{font:inherit}
+    button{color:inherit}
+    .page{width:min(100% - 32px,620px);min-height:100vh;margin:auto;display:grid;place-items:center;padding:34px 0}
+    .card{width:100%;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.82);border-radius:28px;padding:38px 34px 30px;background:var(--card);box-shadow:0 25px 70px rgba(71,101,117,.11);backdrop-filter:blur(12px);transition:background 1.1s ease,box-shadow 1.1s ease}
+    .steam{position:absolute;right:32px;top:28px;width:64px;height:54px;opacity:.48}
+    .steam i{position:absolute;bottom:0;width:1px;height:42px;background:var(--clay);border-radius:50%;transform:rotate(9deg)}
+    .steam i:nth-child(1){left:11px;animation:steam 3s ease-in-out infinite}
+    .steam i:nth-child(2){left:31px;height:50px;animation:steam 3.5s ease-in-out .5s infinite}
+    .steam i:nth-child(3){left:51px;height:36px;animation:steam 2.8s ease-in-out 1s infinite}
+    @keyframes steam{0%,100%{transform:translateY(7px) rotate(7deg);opacity:.25}50%{transform:translateY(-3px) rotate(-7deg);opacity:.85}}
+    .kicker{font-size:11px;letter-spacing:.2em;font-weight:750;text-transform:uppercase;color:var(--clay)}
+    h1{max-width:470px;margin:13px 0 10px;font:500 clamp(31px,7vw,46px)/1.18 Georgia,"Songti SC",serif;letter-spacing:-.025em}
+    .lead{max-width:480px;margin:0 0 27px;color:var(--muted);font-size:15px;line-height:1.75}
+    .progress{display:flex;gap:7px;margin:0 0 30px}
+    .progress span{height:4px;flex:1;border-radius:8px;background:#e5dfd5;transition:.35s ease}
+    .progress span.on{background:var(--sage)}
+    .scene{display:none;animation:enter .38s ease both}
+    .scene.active{display:block}
+    @keyframes enter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+    .question{margin:0 0 17px;font-size:20px;font-weight:680;line-height:1.5}
+    .options{display:grid;gap:10px}
+    .option,.primary,.quiet{width:100%;padding:15px 17px;border-radius:15px;cursor:pointer;transition:.18s ease}
+    .option{border:1px solid var(--line);background:#fffdf9;text-align:left}
+    .option:hover{transform:translateY(-2px);border-color:#bca58f;box-shadow:0 9px 23px rgba(79,63,47,.08)}
+    .option small{display:block;margin-top:4px;color:var(--muted);font-size:12px}
+    .primary{margin-top:19px;border:1px solid var(--clay);background:var(--clay);color:#fff;text-align:center;font-weight:700;box-shadow:0 9px 20px rgba(118,81,58,.15)}
+    .primary:hover{background:var(--clay-dark);border-color:var(--clay-dark)}
+    .quiet{margin-top:8px;border:0;background:transparent;color:var(--muted);text-align:center;font-size:13px}
+    .field{margin-top:16px}
+    label{display:block;margin:0 0 7px;color:#5f5850;font-size:13px;font-weight:700}
+    input,select{width:100%;min-height:49px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;outline:none;color:var(--ink);background:#fffdf9}
+    input:focus,select:focus{border-color:var(--sage);box-shadow:0 0 0 4px rgba(120,128,111,.12)}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .hidden{display:none!important}
+    .summary{margin-top:19px;padding:16px 17px;border:1px solid var(--line);border-radius:15px;background:#f5f1e8;color:#625b53;font-size:14px;line-height:1.9}
+    .summary b{color:var(--ink)}
+    .fineprint{margin:11px 0 0;text-align:center;color:var(--muted);font-size:11px}
+    .time-options{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+    .time-choice{position:relative;min-height:48px;padding:11px;border:1px solid var(--line);border-radius:13px;background:#fffdf9;cursor:pointer;transition:.18s ease}
+    .time-choice:hover{border-color:#bca58f;transform:translateY(-1px)}
+    .time-choice.active{border-color:var(--sage);background:#eef0e9;box-shadow:inset 0 0 0 1px var(--sage)}
+    .time-choice::after{content:"";position:absolute;left:50%;bottom:-5px;width:0;height:2px;border-radius:4px;background:var(--clay);transform:translateX(-50%);transition:width .4s ease}
+    .time-choice:hover::after{width:55%;transition-duration:1s;transition-timing-function:linear}
+    .time-options.fast .time-choice:hover::after{transition-duration:.8s}
+    .bubble-stage{position:absolute;inset:120px 14px 72px;z-index:8;pointer-events:none;overflow:hidden}
+    .bubble{position:absolute;left:var(--x);top:var(--y);max-width:min(78%,320px);padding:11px 15px;border:1px solid rgba(116,151,169,.2);border-radius:18px;background:rgba(252,254,255,.96);box-shadow:0 12px 34px rgba(71,101,117,.14);font-size:14px;line-height:1.45;opacity:0;transform:translate(-50%,-40%) scale(.9) rotate(var(--rotate));backdrop-filter:blur(9px)}
+    .bubble strong{margin-right:5px;color:var(--clay-dark);font-size:12px}
+    .bubble-stage.active .bubble{animation:bubbleFloat 3.5s cubic-bezier(.2,.7,.25,1) var(--delay) both}
+    @keyframes bubbleFloat{0%{opacity:0;transform:translate(-50%,-18%) scale(.86) rotate(var(--rotate))}16%,70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-82%) scale(.96) rotate(var(--rotate))}}
+    .bubble.cloud{border-radius:24px 24px 24px 9px;box-shadow:0 12px 34px rgba(71,101,117,.13),10px 8px 0 rgba(255,255,255,.4)}
+    .bubble.raven{display:flex;align-items:center;gap:8px;border:0;background:rgba(54,65,74,.9);color:#fff;box-shadow:0 12px 32px rgba(40,53,61,.18)}
+    .bubble.raven strong{color:#cde4ef}.raven-icon{font-size:26px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.2))}
+    .bubble-stage.active .bubble.raven{animation:ravenFly 3.5s ease-out var(--delay) both}
+    @keyframes ravenFly{0%{opacity:0;transform:translate(-90%,-25%) rotate(-4deg)}16%,68%{opacity:1;transform:translate(-50%,-50%) rotate(1deg)}100%{opacity:0;transform:translate(15%,-70%) rotate(4deg)}}
+    .bubble.emoji{display:flex;align-items:center;gap:8px;border:0;background:rgba(255,255,255,.83);border-radius:30px;box-shadow:0 10px 30px rgba(111,128,138,.14)}
+    .reaction-emoji{font-size:29px;line-height:1;filter:drop-shadow(0 3px 5px rgba(65,78,87,.12))}
+    .bubble-stage.active .bubble.emoji{animation:emojiPop 3.5s cubic-bezier(.18,.8,.25,1.12) var(--delay) both}
+    @keyframes emojiPop{0%{opacity:0;transform:translate(-50%,-35%) scale(.55) rotate(var(--rotate))}18%,70%{opacity:1;transform:translate(-50%,-50%) scale(1.05) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-70%) scale(.9) rotate(var(--rotate))}}
+    .ending{text-align:center;padding:14px 0 2px}
+    .ending .icon{font-size:44px;margin-bottom:12px}
+    .ending h2{margin:0 0 10px;font:500 32px/1.25 Georgia,"Songti SC",serif}
+    .ending p{margin:6px 0;color:var(--muted);line-height:1.7}
+    .modal{position:fixed;inset:0;z-index:10;display:none;place-items:center;padding:20px;background:rgba(52,47,41,.38);backdrop-filter:blur(7px)}
+    .modal.show{display:grid}
+    .dialog{width:min(100%,410px);padding:25px;border:1px solid rgba(255,255,255,.65);border-radius:23px;background:var(--paper);box-shadow:0 24px 75px rgba(45,37,31,.23);animation:pop .24s ease}
+    @keyframes pop{from{opacity:0;transform:scale(.96)}}
+    .dialog-emoji{font-size:32px}
+    .dialog h2{margin:11px 0 7px;font:500 25px/1.3 Georgia,"Songti SC",serif}
+    .dialog p{margin:0;color:var(--muted);line-height:1.7}
+    .dialog-actions{display:grid;gap:8px;margin-top:19px}
+    .dialog-actions button{padding:13px;border:1px solid var(--line);border-radius:13px;background:#fffdf9;cursor:pointer}
+    .dialog-actions button.main{border-color:var(--ink);background:var(--ink);color:white}
+    @media(max-width:520px){.page{width:min(100% - 20px,620px);padding:10px 0}.card{padding:29px 20px 23px;border-radius:22px}.steam{right:19px;top:22px;transform:scale(.82)}.two{grid-template-columns:1fr}.lead{margin-bottom:22px}}
+
+    /* Editorial motion direction, inspired by creative GSAP showcases. */
+    body{overflow-x:hidden;background:var(--bg-b)}
+    body::before,body::after{content:"";position:fixed;z-index:-2;border-radius:50%;filter:blur(8px);pointer-events:none;transition:background 1.1s ease,transform 1.1s ease}
+    body::before{width:62vw;height:62vw;left:-20vw;top:-26vw;background:radial-gradient(circle,rgba(165,217,241,.56),rgba(226,243,251,.18) 62%,transparent 72%)}
+    body::after{width:55vw;height:55vw;right:-20vw;bottom:-30vw;background:radial-gradient(circle,rgba(252,211,224,.55),rgba(253,236,242,.16) 60%,transparent 72%)}
+    body[data-step="0"]::after,body[data-step="1"]::after{transform:scale(.7);opacity:.35}
+    body[data-step="3"]::after,body[data-step="4"]::after,body[data-step="5"]::after{transform:scale(1.18);opacity:1}
+    .page{width:min(100% - 56px,1120px);min-height:100svh;padding:30px 0;place-items:stretch;align-items:center}
+    .card{min-height:min(820px,calc(100svh - 60px));display:flex;flex-direction:column;justify-content:center;overflow:visible;border:0;border-radius:0;padding:80px 5vw 55px;background:transparent!important;box-shadow:none;backdrop-filter:none}
+    .stage-meta{position:absolute;left:5vw;right:5vw;top:18px;display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(74,103,118,.25);color:#617784;font-size:10px;font-weight:750;letter-spacing:.2em;text-transform:uppercase}
+    .meta-mark{display:grid;place-items:center;width:42px;height:25px;color:#6f8996;opacity:.28}
+    .meta-mark svg{width:42px;height:25px;overflow:visible}
+    .kicker{margin-bottom:10px;color:#547c94;font-size:10px;letter-spacing:.26em}
+    h1{max-width:900px;margin:0 0 18px;font-family:Arial,"PingFang SC",sans-serif;font-size:clamp(48px,8.5vw,108px);font-weight:720;line-height:.98;letter-spacing:-.065em}
+    .headline-line{display:block;overflow:hidden;padding-right:.08em}
+    .char{display:inline-block;animation:charIn .72s cubic-bezier(.16,.8,.28,1) calc(var(--i)*18ms) both}
+    @keyframes charIn{from{opacity:0;transform:translateY(105%) rotate(2deg)}to{opacity:1;transform:none}}
+    #pageLead{max-width:620px;margin-bottom:34px;font-size:14px;animation:softIn .65s .2s both}
+    @keyframes softIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .progress{position:absolute;left:5vw;right:5vw;bottom:23px;margin:0;gap:0}
+    .progress span{height:2px;border-radius:0;background:rgba(85,113,127,.16)}
+    .progress span.on{background:#6d98ad}
+    .scene{width:min(100%,760px)}
+    .scene.active{animation:sceneIn .6s cubic-bezier(.16,.8,.28,1) both}
+    .scene.leaving{display:block;animation:sceneOut .24s ease both}
+    @keyframes sceneIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+    @keyframes sceneOut{to{opacity:0;transform:translateY(-18px)}}
+    .question{margin-bottom:20px;font-size:clamp(18px,2.1vw,26px);font-weight:590;letter-spacing:-.02em}
+    .options{gap:0;border-top:1px solid rgba(84,112,126,.25)}
+    .option{position:relative;border:0;border-bottom:1px solid rgba(84,112,126,.25);border-radius:0;padding:18px 52px 18px 4px;background:transparent;font-size:clamp(16px,2vw,21px);font-weight:570;overflow:hidden;box-shadow:none;transform:translate(var(--mx,0),var(--my,0));transition:color .25s ease,transform .18s ease}
+    .option::before{content:"";position:absolute;z-index:-1;inset:0;background:rgba(255,255,255,.48);transform:translateX(-102%);transition:transform .45s cubic-bezier(.16,.8,.28,1)}
+    .option::after{content:"↗";position:absolute;right:8px;top:50%;font-size:18px;transform:translateY(-50%) rotate(0);transition:transform .3s ease}
+    .option:hover{border-color:rgba(84,112,126,.25);box-shadow:none;transform:translate(var(--mx,0),var(--my,0))}
+    .option:hover::before{transform:none}.option:hover::after{transform:translateY(-50%) rotate(45deg)}
+    .option small{font-weight:400}
+    .two{gap:24px}
+    .field{margin-top:22px}
+    label{letter-spacing:.06em;text-transform:uppercase;font-size:10px;color:#69808d}
+    input,select{border:0;border-bottom:1px solid rgba(84,112,126,.34);border-radius:0;padding:12px 2px;background:transparent;font-size:17px}
+    input:focus,select:focus{border-color:#5f91aa;box-shadow:none}
+    .time-options{gap:6px}
+    .time-choice{border:1px solid rgba(91,121,137,.26);border-radius:999px;background:rgba(255,255,255,.35);transform:translate(var(--mx,0),var(--my,0));transition:background .2s ease,border-color .2s ease,transform .18s ease}
+    .time-choice:hover{transform:translate(var(--mx,0),var(--my,0));background:rgba(255,255,255,.7)}
+    .time-choice.active{background:#ddecf3;border-color:#78a4b8;box-shadow:none}
+    .primary{width:auto;min-width:210px;border-radius:999px;padding:15px 26px;background:#344b58;border-color:#344b58;transform:translate(var(--mx,0),var(--my,0));transition:transform .18s ease,background .2s ease}
+    .primary:hover{background:#52788c;border-color:#52788c;transform:translate(var(--mx,0),var(--my,0))}
+    .summary{border-radius:0;border-width:1px 0;background:rgba(255,255,255,.22)}
+    .dialog{border-radius:4px;background:rgba(250,253,255,.96)}
+    .dialog-actions button{border-radius:999px}
+    .ending{text-align:left}.ending .icon{font-size:52px}.ending h2{font-family:Arial,"PingFang SC",sans-serif;font-size:clamp(44px,7vw,82px);font-weight:730;letter-spacing:-.06em}
+    .cursor-orb{position:fixed;z-index:30;left:0;top:0;width:18px;height:18px;border:1px solid rgba(50,72,83,.55);border-radius:50%;pointer-events:none;opacity:0;transform:translate(-50%,-50%);transition:width .25s ease,height .25s ease,background .25s ease,opacity .2s ease;mix-blend-mode:multiply}
+    .cursor-orb.big{width:50px;height:50px;background:rgba(145,196,218,.22);border-color:rgba(77,116,135,.24)}
+    @media(pointer:fine){body:hover .cursor-orb{opacity:1}}
+    @media(max-width:700px){.page{width:min(100% - 26px,1120px);padding:13px 0}.card{min-height:calc(100svh - 26px);padding:78px 6px 50px}.stage-meta{left:6px;right:6px}.progress{left:6px;right:6px;bottom:15px}h1{font-size:clamp(45px,14vw,72px)}.two{grid-template-columns:1fr}.time-options{grid-template-columns:repeat(3,1fr)}.primary{width:100%}.bubble-stage{inset:120px 0 58px}.steam{display:none}}
+    @media(pointer:coarse),(prefers-reduced-motion:reduce){.cursor-orb{display:none}.char,.scene.active{animation-duration:.01ms!important}.option,.time-choice,.primary{transform:none!important}}
+  </style>
+</head>
+<body data-step="0">
+  <div class="cursor-orb" id="cursorOrb" aria-hidden="true"></div>
+  <main class="page">
+    <section class="card">
+      <div class="stage-meta">
+        <span id="chapterCount">01 / 05</span>
+        <span class="meta-mark" aria-label="餐盘">
+          <svg viewBox="0 0 50 30" role="img" aria-hidden="true">
+            <ellipse cx="25" cy="15" rx="12" ry="10" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <ellipse cx="25" cy="15" rx="7.5" ry="6" fill="none" stroke="currentColor" stroke-width=".8"/>
+            <path d="M5 5v20M2.5 5v7c0 2 5 2 5 0V5M45 5c-3 4-3 9 0 11v9" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+      <div class="steam" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="kicker">A small question</div>
+      <h1 id="pageTitle">有件不太紧急，<br>但想认真问您的事。</h1>
+      <p class="lead" id="pageLead">不会占用很久，大概只需要一点好奇心。</p>
+      <div class="progress" aria-label="进度"><span class="on"></span><span></span><span></span><span></span><span></span></div>
+      <div class="bubble-stage" id="bubbleStage" aria-live="polite"></div>
+
+      <section class="scene active" data-step="0">
+        <p class="question">可以先听我说说嘛？</p>
+        <div class="options">
+          <button class="option" data-go="1">好，您问</button>
+          <button class="option" data-dialog="guess">我大概猜到了</button>
+          <button class="option" data-dialog="type">先说是什么类型的事</button>
+        </div>
+      </section>
+
+      <section class="scene" data-step="1">
+        <p class="question">想找个时间，和您约 ☕️ 啊，可以嘛？</p>
+        <div class="options">
+          <button class="option" data-go="2">可以呀</button>
+          <button class="option" data-dialog="busy">最近有点忙</button>
+          <button class="option" data-dialog="consider">让我考虑一下</button>
+        </div>
+      </section>
+
+      <section class="scene" data-step="2">
+        <p class="question">那就选一个您方便的时间吧。</p>
+        <p class="lead">不用迁就我，您选好，我负责出现。</p>
+        <div class="two">
+          <div class="field"><label for="date">日期</label><input id="date" type="date"></div>
+          <div class="field"><label>大概什么时间</label><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午">上午</button><button class="time-choice" data-time="中午">中午</button><button class="time-choice" data-time="下午">下午</button><button class="time-choice" data-time="晚上">晚上</button><button class="time-choice" data-time="午夜">午夜</button><button class="time-choice" data-time="待定">待定</button></div></div>
+        </div>
+        <div class="field">
+          <label for="duration">您打算分给这杯咖啡多久？</label>
+          <select id="duration">
+            <option value="60">先喝一杯，约 1 小时</option>
+            <option value="120">可以慢慢聊，约 2 小时</option>
+            <option value="open">不设结束时间，看情况</option>
+          </select>
+        </div>
+        <button class="primary" id="saveTime">这个时间可以</button>
+      </section>
+
+      <section class="scene" data-step="3">
+        <p class="question">想在哪里见面？</p>
+        <div class="options" id="placeChoices">
+          <button class="option" data-place="self">我有想去的地方</button>
+          <button class="option" data-place="host">您来选吧</button>
+          <button class="option" data-dialog="coffee">只要咖啡好喝就行</button>
+        </div>
+        <div class="field hidden" id="placeField">
+          <label for="place">您想去哪里？</label>
+          <input id="place" placeholder="店名、地址，或一个大概的位置">
+          <button class="primary" id="savePlace">就这里吧</button>
+          <button class="quiet" id="backToPlaces">重新选</button>
+        </div>
+      </section>
+
+      <section class="scene" data-step="4">
+        <p class="question">那就差最后一步啦。</p>
+        <p class="lead">确认一下，没问题就把这天存进日历。</p>
+        <div class="summary" id="summary"></div>
+        <button class="primary" id="review">好，就这么定啦</button>
+        <p class="fineprint">不会发送邮件，也不需要留下任何信息。</p>
+      </section>
+
+      <section class="scene" data-step="5">
+        <div class="ending">
+          <div class="icon">☕️</div>
+          <h2>好滴，到时候见啦～</h2>
+          <p>点一下，把这天存进日历。</p>
+          <p id="hostPlaceEnding" class="hidden">地点我来选，选好告诉您。</p>
+          <button class="primary" id="downloadIcs">下载日程 .ics</button>
+          <button class="quiet" onclick="location.reload()">再看一遍</button>
+        </div>
+      </section>
+
+      <section class="scene" data-step="6">
+        <div class="ending">
+          <div class="icon">🌿</div>
+          <h2>没关系呀。</h2>
+          <p>等您哪天有空、也有心情的时候再说。</p>
+          <button class="primary" onclick="location.reload()">回到开头</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <div class="dialog">
+      <div class="dialog-emoji" id="dialogEmoji"></div>
+      <h2 id="dialogTitle"></h2>
+      <p id="dialogText"></p>
+      <div class="dialog-actions" id="dialogActions"></div>
+    </div>
+  </div>
+
+  <script>
+    const config={inviterName:'Singhat'};
+    const state={date:'',time:'',duration:'60',placeMode:'',place:''};
+    const titles=[
+      ['有件不太紧急，<br>但想认真问您的事。','不会占用很久，大概只需要一点好奇心。'],
+      ['那我就直接问啦。',''],['时间由您来定。',''],['再决定一个地方。',''],['最后确认一下。',''],['',''],['','']
+    ];
+    const dialogs={
+      guess:{emoji:'🙂',title:'那您猜得准嘛？',text:'如果猜的是“有人想见您”，那确实猜对了一点。',actions:[['继续听听',1,true],['我再猜猜',0,false]]},
+      type:{emoji:'☕️',title:'是需要您亲自出现的事。',text:'不严肃，也不复杂，最好还能有杯咖啡。',actions:[['好，继续说',1,true]]},
+      busy:{emoji:'📅',title:'是时间不太好找嘛？',text:'时间可以完全由您来定。如果只是最近不想约，也可以直接说，没关系呀。',actions:[['那我挑个时间',2,true],['最近先不约啦',6,false]]},
+      consider:{emoji:'🌿',title:'当然可以。',text:'您可以慢慢想，这里不催。',actions:[['我想好了，继续',2,true],['今天先到这',6,false]]},
+      timeSaved:{emoji:'✓',title:'时间记住啦。',text:'看起来那天从现在开始，稍微有点不一样。',actions:[['接着选地点',3,true]]},
+      coffee:{emoji:'☕️',title:'这个要求不过分。',text:'收到，地点我来选，尽量保证咖啡好喝。',actions:[['好呀',4,true,'host'],['我还是自己选',3,false,'self']]},
+      missing:{emoji:'✎',title:'还差一点点。',text:'请先把这一页的信息填完整。',actions:[['我补一下',null,true]]}
+    };
+    const scenes=[...document.querySelectorAll('.scene')];
+    const dots=[...document.querySelectorAll('.progress span')];
+    const modal=document.getElementById('modal');
+
+    let activeStep=0,transitionTimer;
+    function renderTitle(html){
+      let characterIndex=0;
+      document.getElementById('pageTitle').innerHTML=html.split('<br>').map(line=>{
+        const characters=Array.from(line).map(character=>`<span class="char" style="--i:${characterIndex++}">${character===' '?'&nbsp;':character}</span>`).join('');
+        return `<span class="headline-line">${characters||'&nbsp;'}</span>`;
+      }).join('');
+    }
+    function applyStep(step){
+      scenes.forEach(s=>{s.classList.remove('leaving');s.classList.toggle('active',Number(s.dataset.step)===step)});
+      dots.forEach((d,i)=>d.classList.toggle('on',i<=Math.min(step,4)));
+      document.body.dataset.step=String(step);
+      const [title,lead]=titles[step]||['',''];
+      renderTitle(title);
+      document.getElementById('pageLead').textContent=lead;
+      document.getElementById('chapterCount').textContent=`${String(Math.min(step+1,5)).padStart(2,'0')} / 05`;
+      document.querySelector('.progress').classList.toggle('hidden',step>4);
+      activeStep=step;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function go(step){
+      clearTimeout(transitionTimer);
+      if(step===activeStep){applyStep(step);return}
+      const current=scenes.find(scene=>scene.classList.contains('active'));
+      if(current)current.classList.add('leaving');
+      transitionTimer=setTimeout(()=>applyStep(step),220);
+    }
+    function openDialog(key){
+      const d=dialogs[key];
+      document.getElementById('dialogEmoji').textContent=d.emoji;
+      document.getElementById('dialogTitle').textContent=d.title;
+      document.getElementById('dialogText').textContent=d.text;
+      const actions=document.getElementById('dialogActions'); actions.innerHTML='';
+      d.actions.forEach(([label,target,main,placeMode])=>{
+        const button=document.createElement('button'); button.textContent=label; button.className=main?'main':'';
+        button.onclick=()=>{
+          if(placeMode==='host'){state.placeMode='host';state.place='TBD by Singhat';renderSummary()}
+          if(placeMode==='self'){showPlaceInput();modal.classList.remove('show');return}
+          modal.classList.remove('show'); if(target!==null)go(target);
+        };
+        actions.appendChild(button);
+      });
+      modal.classList.add('show');
+    }
+    document.addEventListener('click',event=>{
+      const button=event.target.closest('[data-go],[data-dialog]'); if(!button)return;
+      button.dataset.dialog?openDialog(button.dataset.dialog):go(Number(button.dataset.go));
+    });
+    document.getElementById('date').min=new Date().toISOString().slice(0,10);
+    const timeComments={
+      '上午':[['S','这个点见面，看来您对咖啡是认真的'],['Z','也可能只是想把下午留给回味'],['双子座晨间播报','清醒得有一点可疑']],
+      '中午':[['S','那就别只喝咖啡了，顺便吃饭？'],['Z','先吃饭，咖啡负责续场'],['菜单研究小组','已自动从一杯升级为一顿']],
+      '下午':[['S','咖啡的黄金时段，稳妥得不像双子'],['Z','适合聊天，也适合假装只是聊天'],['INTJ 联席会议','议程合理，暧昧程度待评估']],
+      '晚上':[['S','吃饭、小酌，再散个步？'],['Z','流程挺完整，像是早有预谋'],['双子座内部群聊','同意，但拒绝承认期待']],
+      '午夜':[['S｜紫老头','小酌加散步？这个时间认真的吗？'],['Z','月亮都上班了，我们为什么不能'],['日历本人','这已经不是咖啡局了吧']],
+      '待定':[['S','您这是把悬念也算进流程了'],['Z','给未来一点临场发挥'],['本次行程甲方','很好，谁都没有真正做决定']]
+    };
+    const bubbleVariants=['cloud','raven','emoji'];
+    const reactionEmojis=['🫧','👀','☕️','🤨','✨','🫠','😌','🌙'];
+    let hoverTimer,bubbleTimer,hasPlayedTimeComment=false;
+    function shuffle(items){return [...items].sort(()=>Math.random()-.5)}
+    function randomPosition(index){
+      const zones=[[24,25],[70,48],[38,76]],base=zones[index];
+      const x=Math.max(14,Math.min(86,base[0]+(Math.random()*18-9)));
+      const y=Math.max(14,Math.min(86,base[1]+(Math.random()*16-8)));
+      return [`${x}%`,`${y}%`,`${(index*.12-.05).toFixed(2)}s`,`${(Math.random()*6-3).toFixed(1)}deg`];
+    }
+    function showBubbles(slot){
+      const stage=document.getElementById('bubbleStage'); stage.innerHTML='';
+      const variants=shuffle(bubbleVariants);
+      timeComments[slot].forEach(([speaker,text],index)=>{
+        const variant=variants[index],bubble=document.createElement('div'); bubble.className=`bubble ${variant}`;
+        const [x,y,delay,rotate]=randomPosition(index); bubble.style.cssText=`--x:${x};--y:${y};--delay:${delay};--rotate:${rotate}`;
+        if(variant==='raven')bubble.innerHTML=`<span class="raven-icon">🐦‍⬛</span><span><strong>${speaker}：</strong>${text}</span>`;
+        else if(variant==='emoji')bubble.innerHTML=`<span class="reaction-emoji">${reactionEmojis[Math.floor(Math.random()*reactionEmojis.length)]}</span><span><strong>${speaker}：</strong>${text}</span>`;
+        else bubble.innerHTML=`<strong>${speaker}：</strong>${text}`;
+        stage.appendChild(bubble);
+      });
+      stage.classList.remove('active'); void stage.offsetWidth; stage.classList.add('active');
+      hasPlayedTimeComment=true; document.getElementById('timeOptions').classList.add('fast');
+      clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>{stage.classList.remove('active');stage.innerHTML=''},3900);
+    }
+    document.querySelectorAll('.time-choice').forEach(button=>{
+      button.addEventListener('mouseenter',()=>{clearTimeout(hoverTimer);hoverTimer=setTimeout(()=>showBubbles(button.dataset.time),hasPlayedTimeComment?800:1000)});
+      button.addEventListener('mouseleave',()=>clearTimeout(hoverTimer));
+      button.addEventListener('click',()=>{
+        state.time=button.dataset.time;
+        document.querySelectorAll('.time-choice').forEach(item=>item.classList.toggle('active',item===button));
+        if(matchMedia('(hover:none)').matches)showBubbles(button.dataset.time);
+      });
+    });
+    document.getElementById('saveTime').onclick=()=>{
+      const date=document.getElementById('date').value,time=state.time;
+      if(!date||!time){openDialog('missing');return}
+      Object.assign(state,{date,time,duration:document.getElementById('duration').value});openDialog('timeSaved');
+    };
+    document.querySelectorAll('[data-place]').forEach(button=>button.onclick=()=>{
+      if(button.dataset.place==='self')showPlaceInput();
+      else{state.placeMode='host';state.place='TBD by Singhat';renderSummary();go(4)}
+    });
+    function showPlaceInput(){document.getElementById('placeChoices').classList.add('hidden');document.getElementById('placeField').classList.remove('hidden');document.getElementById('place').focus()}
+    document.getElementById('backToPlaces').onclick=()=>{document.getElementById('placeChoices').classList.remove('hidden');document.getElementById('placeField').classList.add('hidden')};
+    document.getElementById('savePlace').onclick=()=>{const place=document.getElementById('place').value.trim();if(!place){openDialog('missing');return}state.placeMode='self';state.place=place;renderSummary();go(4)};
+    function safe(value){const div=document.createElement('div');div.textContent=value;return div.innerHTML}
+    function durationText(){return state.duration==='open'?'不设结束时间，看情况':state.duration==='120'?'约 2 小时':'约 1 小时'}
+    function dateText(){if(!state.date)return'';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${state.date}T00:00:00`))}
+    function renderSummary(){document.getElementById('summary').innerHTML=`<b>时间</b>　${dateText()} ${safe(state.time)}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
+    function icsDate(dateString){return dateString.replaceAll('-','')}
+    function nextIcsDate(dateString){
+      const date=new Date(`${dateString}T12:00:00Z`); date.setUTCDate(date.getUTCDate()+1);
+      return date.toISOString().slice(0,10).replaceAll('-','');
+    }
+    function icsTimestamp(){return new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z')}
+    function escapeIcs(value){return String(value).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n')}
+    function downloadInvite(){
+      const description=`Z 选择的时段：${state.time}；预计时长：${durationText()}。`;
+      const uid=`meeting-${state.date}-${Date.now()}@singhat.local`;
+      const content=[
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Singhat//Meeting Invitation//CN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+        'BEGIN:VEVENT',`UID:${uid}`,`DTSTAMP:${icsTimestamp()}`,`DTSTART;VALUE=DATE:${icsDate(state.date)}`,`DTEND;VALUE=DATE:${nextIcsDate(state.date)}`,
+        'SUMMARY:Meeting with Singhat ☕️',`LOCATION:${escapeIcs(state.place)}`,`DESCRIPTION:${escapeIcs(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR'
+      ].join('\r\n');
+      const blob=new Blob([content],{type:'text/calendar;charset=utf-8'}),link=document.createElement('a');
+      const url=URL.createObjectURL(blob);
+      link.href=url; link.download=`meeting-with-singhat-${state.date}.ics`; document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+    document.getElementById('review').onclick=()=>{
+      go(5);
+      document.getElementById('hostPlaceEnding').classList.toggle('hidden',state.placeMode!=='host');
+    };
+    document.getElementById('downloadIcs').onclick=downloadInvite;
+    const cursorOrb=document.getElementById('cursorOrb');
+    if(matchMedia('(pointer:fine)').matches){
+      document.addEventListener('pointermove',event=>{
+        cursorOrb.style.transform=`translate(${event.clientX-9}px,${event.clientY-9}px)`;
+        const magnetic=event.target.closest('button');
+        if(!magnetic)return;
+        const rect=magnetic.getBoundingClientRect();
+        magnetic.style.setProperty('--mx',`${(event.clientX-rect.left-rect.width/2)*.07}px`);
+        magnetic.style.setProperty('--my',`${(event.clientY-rect.top-rect.height/2)*.07}px`);
+      });
+      document.addEventListener('pointerover',event=>{if(event.target.closest('button'))cursorOrb.classList.add('big')});
+      document.addEventListener('pointerout',event=>{
+        const button=event.target.closest('button');
+        if(button&&!button.contains(event.relatedTarget)){button.style.setProperty('--mx','0px');button.style.setProperty('--my','0px');cursorOrb.classList.remove('big')}
+      });
+    }
+    renderTitle(titles[0][0]);
+  </script>
+</body>
+</html>
