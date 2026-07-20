@@ -146,7 +146,22 @@
     .cursor-orb{position:fixed;z-index:30;left:0;top:0;width:18px;height:18px;border:1px solid rgba(50,72,83,.55);border-radius:50%;pointer-events:none;opacity:0;transform:translate(-50%,-50%);transition:width .25s ease,height .25s ease,background .25s ease,opacity .2s ease;mix-blend-mode:multiply}
     .cursor-orb.big{width:50px;height:50px;background:rgba(145,196,218,.22);border-color:rgba(77,116,135,.24)}
     @media(pointer:fine){body:hover .cursor-orb{opacity:1}}
-    @media(max-width:700px){.page{width:min(100% - 26px,1120px);padding:13px 0}.card{min-height:calc(100svh - 26px);padding:78px 6px 50px}.stage-meta{left:6px;right:6px}.progress{left:6px;right:6px;bottom:15px}h1{font-size:clamp(45px,14vw,72px)}.two{grid-template-columns:1fr}.time-options{grid-template-columns:repeat(3,1fr)}.primary{width:100%}.bubble-stage{inset:120px 0 58px}.steam{display:none}}
+    @media(max-width:700px){
+      .page{width:min(100% - 26px,1120px);padding:13px 0}
+      .card{min-height:calc(100svh - 26px);padding:78px 6px 50px}
+      .stage-meta{left:6px;right:6px}
+      .progress{left:6px;right:6px;bottom:15px}
+      h1{font-size:clamp(45px,14vw,72px)}
+      .two{grid-template-columns:1fr}
+      .time-options{grid-template-columns:repeat(3,1fr)}
+      .primary{width:100%}
+      .bubble-stage{inset:104px 6px 54px;overflow:visible}
+      .bubble{width:max-content;max-width:calc(100% - 22px);padding:10px 13px;font-size:13px;line-height:1.42}
+      .bubble strong{font-size:11px}
+      .bubble.raven,.bubble.emoji{gap:6px}
+      .raven-icon,.reaction-emoji{font-size:23px}
+      .steam{display:none}
+    }
     @media(pointer:coarse),(prefers-reduced-motion:reduce){.cursor-orb{display:none}.char,.scene.active{animation-duration:.01ms!important}.option,.time-choice,.primary{transform:none!important}}
   </style>
 </head>
@@ -343,6 +358,10 @@
     let hoverTimer,bubbleTimer,hasPlayedTimeComment=false;
     function shuffle(items){return [...items].sort(()=>Math.random()-.5)}
     function randomPosition(index){
+      if(matchMedia('(max-width:700px)').matches){
+        const mobileY=[22,49,74][index];
+        return [`${50+(Math.random()*6-3)}%`,`${mobileY+(Math.random()*8-4)}%`,`${(index*.12-.05).toFixed(2)}s`,`${(Math.random()*4-2).toFixed(1)}deg`];
+      }
       const zones=[[24,25],[70,48],[38,76]],base=zones[index];
       const x=Math.max(14,Math.min(86,base[0]+(Math.random()*18-9)));
       const y=Math.max(14,Math.min(86,base[1]+(Math.random()*16-8)));
