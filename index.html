@@ -58,6 +58,7 @@
     .fineprint{margin:11px 0 0;text-align:center;color:var(--muted);font-size:11px}
     .time-options{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
     .time-choice{position:relative;min-height:48px;padding:11px;border:1px solid var(--line);border-radius:13px;background:#fffdf9;cursor:pointer;transition:.18s ease}
+    .time-choice span{display:block;font-weight:650}.time-choice small{display:block;margin-top:3px;color:var(--muted);font-size:10px;white-space:nowrap}
     .time-choice:hover{border-color:#bca58f;transform:translateY(-1px)}
     .time-choice.active{border-color:var(--sage);background:#eef0e9;box-shadow:inset 0 0 0 1px var(--sage)}
     .time-choice::after{content:"";position:absolute;left:50%;bottom:-5px;width:0;height:2px;border-radius:4px;background:var(--clay);transform:translateX(-50%);transition:width .4s ease}
@@ -224,7 +225,7 @@
         <p class="lead">不用迁就我，您选好，我负责出现。</p>
         <div class="two">
           <div class="field"><label for="date">日期</label><input id="date" type="date"></div>
-          <div class="field"><label>大概什么时间</label><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午">上午</button><button class="time-choice" data-time="中午">中午</button><button class="time-choice" data-time="下午">下午</button><button class="time-choice" data-time="晚上">晚上</button><button class="time-choice" data-time="午夜">午夜</button><button class="time-choice" data-time="待定">待定</button></div></div>
+          <div class="field"><label>大概什么时间</label><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午"><span>上午</span><small>08:00—11:00</small></button><button class="time-choice" data-time="中午"><span>中午</span><small>11:30—13:30</small></button><button class="time-choice" data-time="下午"><span>下午</span><small>14:00—17:00</small></button><button class="time-choice" data-time="晚上"><span>晚上</span><small>18:00—22:00</small></button><button class="time-choice" data-time="午夜"><span>午夜</span><small>23:00—次日 01:00</small></button><button class="time-choice" data-time="待定"><span>待定</span><small>保留一点悬念</small></button></div></div>
         </div>
         <div class="field">
           <label for="duration">您打算分给这杯咖啡多久？</label>
@@ -314,6 +315,14 @@
       }
     };
     const state={date:'',time:'',duration:'60',placeMode:'',place:''};
+    const timeSlots={
+      '上午':{start:'08:00',end:'11:00'},
+      '中午':{start:'11:30',end:'13:30'},
+      '下午':{start:'14:00',end:'17:00'},
+      '晚上':{start:'18:00',end:'22:00'},
+      '午夜':{start:'23:00',end:'01:00',endNextDay:true},
+      '待定':null
+    };
     const titles=[
       ['有件不太紧急，<br>但想认真问您的事。','不会占用很久，大概只需要一点好奇心。'],
       ['那我就直接问啦。',''],['时间由您来定。',''],['再决定一个地方。',''],['最后确认一下。',''],['',''],['','']
@@ -450,8 +459,9 @@
     function safe(value){const div=document.createElement('div');div.textContent=value;return div.innerHTML}
     function durationText(){return state.duration==='open'?'不设结束时间，看情况':state.duration==='120'?'约 2 小时':'约 1 小时'}
     function dateText(){if(!state.date)return'';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${state.date}T00:00:00`))}
-    function renderSummary(){document.getElementById('summary').innerHTML=`<b>时间</b>　${dateText()} ${safe(state.time)}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
-    function emailTitle(){return `${dateText()}｜${state.time}｜${durationText()}｜${state.place}`}
+    function timeText(){const slot=timeSlots[state.time];return slot?`${state.time} · ${slot.start}—${slot.endNextDay?'次日 ':''}${slot.end}`:state.time}
+    function renderSummary(){document.getElementById('summary').innerHTML=`<b>时间</b>　${dateText()} ${safe(timeText())}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
+    function emailTitle(){return `${dateText()}｜${timeText()}｜${durationText()}｜${state.place}`}
     let emailQueue=Promise.resolve(),lastEmailRequestAt=0;
     function sendEmail(templateId,templateParams){
       emailQueue=emailQueue.catch(()=>{}).then(async()=>{
@@ -481,7 +491,7 @@
         name:config.inviterName,
         title:emailTitle(),
         date:dateText(),
-        time:state.time,
+        time:timeText(),
         duration:durationText(),
         place:state.place,
         message:`Z 已确认：${emailTitle()}`,
@@ -515,12 +525,27 @@
     }
     function icsTimestamp(){return new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z')}
     function escapeIcs(value){return String(value).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n')}
+    function timedIcsRange(){
+      const slot=timeSlots[state.time];if(!slot)return null;
+      const [year,month,day]=state.date.split('-').map(Number),[startHour,startMinute]=slot.start.split(':').map(Number);
+      const start=new Date(year,month-1,day,startHour,startMinute),end=new Date(start);
+      if(state.duration==='open'){
+        const [endHour,endMinute]=slot.end.split(':').map(Number);
+        end.setHours(endHour,endMinute,0,0);if(slot.endNextDay)end.setDate(end.getDate()+1);
+      }else end.setMinutes(end.getMinutes()+Number(state.duration));
+      const format=date=>`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}T${String(date.getHours()).padStart(2,'0')}${String(date.getMinutes()).padStart(2,'0')}00`;
+      return {start:format(start),end:format(end)};
+    }
     function downloadInvite(){
-      const description=`Z 选择的时段：${state.time}；预计时长：${durationText()}。`;
+      const description=`Z 选择的时段：${timeText()}；预计时长：${durationText()}。`;
       const uid=`meeting-${state.date}-${Date.now()}@singhat.local`;
+      const range=timedIcsRange();
+      const dateLines=range
+        ?[`DTSTART;TZID=Asia/Shanghai:${range.start}`,`DTEND;TZID=Asia/Shanghai:${range.end}`]
+        :[`DTSTART;VALUE=DATE:${icsDate(state.date)}`,`DTEND;VALUE=DATE:${nextIcsDate(state.date)}`];
       const content=[
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Singhat//Meeting Invitation//CN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
-        'BEGIN:VEVENT',`UID:${uid}`,`DTSTAMP:${icsTimestamp()}`,`DTSTART;VALUE=DATE:${icsDate(state.date)}`,`DTEND;VALUE=DATE:${nextIcsDate(state.date)}`,
+        'BEGIN:VEVENT',`UID:${uid}`,`DTSTAMP:${icsTimestamp()}`,...dateLines,
         'SUMMARY:Meeting with Singhat ☕️',`LOCATION:${escapeIcs(state.place)}`,`DESCRIPTION:${escapeIcs(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR'
       ].join('\r\n');
       const blob=new Blob([content],{type:'text/calendar;charset=utf-8'}),link=document.createElement('a');
