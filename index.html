@@ -299,7 +299,6 @@
   <script>
     const config={
       inviterName:'Singhat',
-      hostEmail:'senhaiti@hotmail.com',
       emailjs:{
         publicKey:'Lk-X17zSnfT3gcQNa',serviceId:'service_ws6khg9',
         hostTemplateId:'template_vozvyma',guestTemplateId:'template_5nq7qkr'
@@ -521,8 +520,6 @@
     }
     function sendSelectionEmail(){
       return sendEmail(config.emailjs.hostTemplateId,emailParams({
-        to_email:config.hostEmail,
-        email:config.hostEmail,
         to_name:config.inviterName
       }));
     }
@@ -581,9 +578,11 @@
       document.getElementById('calendarHint').classList.remove('hidden');
       document.getElementById('chooseEmail').classList.remove('active');
       document.getElementById('downloadIcs').classList.add('active');
+      notifySelection();
     }
     let guestEmailInFlight=false,guestEmailSent=false;
     document.getElementById('chooseEmail').onclick=()=>{
+      notifySelection();
       document.getElementById('guestEmailPanel').classList.remove('hidden');
       document.getElementById('calendarHint').classList.add('hidden');
       document.getElementById('chooseEmail').classList.add('active');
