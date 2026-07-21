@@ -299,6 +299,7 @@
   <script>
     const config={
       inviterName:'Singhat',
+      hostEmail:'1250921314@qq.com',
       emailjs:{
         publicKey:'Lk-X17zSnfT3gcQNa',serviceId:'service_ws6khg9',
         hostTemplateId:'template_vozvyma',guestTemplateId:'template_5nq7qkr'
@@ -520,6 +521,8 @@
     }
     function sendSelectionEmail(){
       return sendEmail(config.emailjs.hostTemplateId,emailParams({
+        to_email:config.hostEmail,
+        email:config.hostEmail,
         to_name:config.inviterName
       }));
     }
@@ -535,7 +538,7 @@
         status.className='send-status success';status.textContent='✓ Singhat 已收到您的选择。';
       }catch(error){
         console.error(error);
-        status.className='send-status error';status.textContent=`通知没发出去：${error.message}`;retry.classList.add('show');
+        status.className='send-status error';status.textContent='通知暂时没发出去，请稍后重试。';retry.classList.add('show');
       }finally{
         emailSendInFlight=false;retry.disabled=false;
       }
