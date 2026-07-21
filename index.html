@@ -45,7 +45,7 @@
     label{display:block;margin:0 0 7px;color:#5f5850;font-size:13px;font-weight:700}
     input,select{width:100%;min-height:49px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;outline:none;color:var(--ink);background:#fffdf9}
     input:focus,select:focus{border-color:var(--sage);box-shadow:0 0 0 4px rgba(120,128,111,.12)}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .two{display:grid;grid-template-columns:1fr;gap:12px}
     .hidden{display:none!important}
     .summary{margin-top:19px;padding:16px 17px;border:1px solid var(--line);border-radius:15px;background:#f5f1e8;color:#625b53;font-size:14px;line-height:1.9}
     .summary b{color:var(--ink)}
@@ -55,6 +55,9 @@
     .time-choice span{display:block;font-weight:650}.time-choice small{display:block;margin-top:3px;color:var(--muted);font-size:10px;white-space:nowrap}
     .time-choice:hover{border-color:#bca58f;transform:translateY(-1px)}
     .time-choice.active{border-color:var(--sage);background:#eef0e9;box-shadow:inset 0 0 0 1px var(--sage)}
+    .time-choice:disabled{cursor:not-allowed;opacity:.38;transform:none!important}
+    .time-choice:disabled:hover{border-color:var(--line);box-shadow:none}
+    .time-choice:disabled::after{display:none}
     .time-choice::after{content:"";position:absolute;left:50%;bottom:-5px;width:0;height:2px;border-radius:4px;background:var(--clay);transform:translateX(-50%);transition:width .4s ease}
     .time-choice:hover::after{width:55%;transition-duration:1s;transition-timing-function:linear}
     .time-options.fast .time-choice:hover::after{transition-duration:.8s}
@@ -137,6 +140,9 @@
     .time-choice{border:1px solid rgba(91,121,137,.26);border-radius:999px;background:rgba(255,255,255,.35);transform:translate(var(--mx,0),var(--my,0));transition:background .2s ease,border-color .2s ease,transform .18s ease}
     .time-choice:hover{transform:translate(var(--mx,0),var(--my,0));background:rgba(255,255,255,.7)}
     .time-choice.active{background:#ddecf3;border-color:#78a4b8;box-shadow:none}
+    #dateField{max-width:280px}
+    .field-hint,.time-gate{display:block;margin:7px 0 0;color:#80909a;font-size:11px;line-height:1.5}
+    .time-gate{margin:0 0 9px;color:#658291}
     .outing-preview{min-height:24px;margin:13px 0 0;color:#58778a;font-size:13px;line-height:1.55;opacity:0;transform:translateY(5px);transition:opacity .3s ease,transform .3s ease}
     .outing-preview.show{opacity:1;transform:none}
     .primary{width:auto;min-width:210px;border-radius:999px;padding:15px 26px;background:#344b58;border-color:#344b58;transform:translate(var(--mx,0),var(--my,0));transition:transform .18s ease,background .2s ease}
@@ -162,6 +168,7 @@
       .progress{left:6px;right:6px;bottom:15px}
       h1{font-size:clamp(45px,14vw,72px)}
       .two{grid-template-columns:1fr}
+      #dateField{max-width:none}
       .time-options{grid-template-columns:repeat(3,1fr)}
       .primary{width:100%}
       .bubble{font-size:12px}
@@ -208,8 +215,8 @@
         <p class="question">那就选一个您方便的时间吧。</p>
         <p class="lead">不用迁就我，您选好，我负责出现。</p>
         <div class="two">
-          <div class="field"><label for="date">日期</label><input id="date" type="date"></div>
-          <div class="field"><label>大概什么时间</label><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午"><span>上午</span><small>08:00-11:00</small></button><button class="time-choice" data-time="中午"><span>中午</span><small>11:30-13:30</small></button><button class="time-choice" data-time="下午"><span>下午</span><small>14:00-17:00</small></button><button class="time-choice" data-time="晚上"><span>晚上</span><small>18:00-22:00</small></button><button class="time-choice" data-time="午夜"><span>午夜</span><small>23:00-次日 01:00</small></button><button class="time-choice" data-time="待定"><span>待定</span><small>保留一点悬念</small></button></div><p class="outing-preview" id="outingPreview" aria-live="polite"></p><div class="bubble-stage" id="bubbleStage" aria-live="polite"></div></div>
+          <div class="field" id="dateField"><label for="date">先选日期</label><input id="date" type="date"><small class="field-hint">过去的日期不可选</small></div>
+          <div class="field"><label>再选大概时间</label><p class="time-gate" id="timeGate">选好日期后，时段会自动解锁</p><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午"><span>上午</span><small>08:00-11:00</small></button><button class="time-choice" data-time="中午"><span>中午</span><small>11:30-13:30</small></button><button class="time-choice" data-time="下午"><span>下午</span><small>14:00-17:00</small></button><button class="time-choice" data-time="晚上"><span>晚上</span><small>18:00-22:00</small></button><button class="time-choice" data-time="午夜"><span>午夜</span><small>23:00-次日 01:00</small></button><button class="time-choice" data-time="待定"><span>待定</span><small>保留一点悬念</small></button></div><p class="outing-preview" id="outingPreview" aria-live="polite"></p><div class="bubble-stage" id="bubbleStage" aria-live="polite"></div></div>
         </div>
         <div class="field">
           <label for="duration">您想为这次见面留多久？</label>
@@ -385,7 +392,13 @@
       const button=event.target.closest('[data-go],[data-dialog]'); if(!button)return;
       button.dataset.dialog?openDialog(button.dataset.dialog):go(Number(button.dataset.go));
     });
-    document.getElementById('date').min=new Date().toISOString().slice(0,10);
+    const dateInput=document.getElementById('date'),timeChoiceButtons=[...document.querySelectorAll('.time-choice')];
+    function localToday(){
+      const now=new Date();
+      return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    }
+    dateInput.min=localToday();
+    timeChoiceButtons.forEach(button=>button.disabled=true);
     const timeComments={
       '上午':['晨间观察员','清醒得有一点可疑',['🌞','🥐'],43],
       '中午':['菜单研究小组','本次会面已升级为一顿',['🍜','🥢'],24],
@@ -411,8 +424,21 @@
       clearTimeout(bubbleTimer);
       activeCommentSlot='';const stage=document.getElementById('bubbleStage');stage.classList.remove('active');stage.innerHTML='';
     }
+    function syncDateGate(){
+      if(dateInput.value&&dateInput.value<dateInput.min)dateInput.value='';
+      const hasValidDate=Boolean(dateInput.value&&dateInput.value>=dateInput.min);
+      timeChoiceButtons.forEach(button=>button.disabled=!hasValidDate);
+      document.getElementById('timeGate').classList.toggle('hidden',hasValidDate);
+      if(!hasValidDate&&state.time){
+        state.time='';timeChoiceButtons.forEach(button=>button.classList.remove('active'));
+        const preview=document.getElementById('outingPreview');preview.textContent='';preview.classList.remove('show');clearBubbles();
+      }
+    }
+    dateInput.addEventListener('input',syncDateGate);
+    dateInput.addEventListener('change',syncDateGate);
+    syncDateGate();
     const canHoverTimeChoices=matchMedia('(hover:hover) and (pointer:fine)').matches;
-    document.querySelectorAll('.time-choice').forEach(button=>{
+    timeChoiceButtons.forEach(button=>{
       button.addEventListener('mouseenter',()=>{
         if(!canHoverTimeChoices)return;
         clearTimeout(hoverTimer);
@@ -424,15 +450,15 @@
       button.addEventListener('click',()=>{
         clearTimeout(hoverTimer);
         state.time=button.dataset.time;
-        document.querySelectorAll('.time-choice').forEach(item=>item.classList.toggle('active',item===button));
+        timeChoiceButtons.forEach(item=>item.classList.toggle('active',item===button));
         const profile=outingProfile(),preview=document.getElementById('outingPreview');
         preview.textContent=profile.preview;preview.classList.add('show');
         if(activeCommentSlot!==button.dataset.time)showBubbles(button.dataset.time);
       });
     });
     document.getElementById('saveTime').onclick=()=>{
-      const date=document.getElementById('date').value,time=state.time;
-      if(!date||!time){openDialog('missing');return}
+      const date=dateInput.value,time=state.time;
+      if(!date||date<dateInput.min||!time){openDialog('missing');return}
       Object.assign(state,{date,time,duration:document.getElementById('duration').value});clearBubbles();openDialog('timeSaved');
     };
     document.querySelectorAll('[data-place]').forEach(button=>button.onclick=()=>{
