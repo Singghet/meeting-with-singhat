@@ -58,20 +58,13 @@
     .time-choice::after{content:"";position:absolute;left:50%;bottom:-5px;width:0;height:2px;border-radius:4px;background:var(--clay);transform:translateX(-50%);transition:width .4s ease}
     .time-choice:hover::after{width:55%;transition-duration:1s;transition-timing-function:linear}
     .time-options.fast .time-choice:hover::after{transition-duration:.8s}
-    .bubble-stage{position:absolute;inset:120px 14px 72px;z-index:8;pointer-events:none;overflow:hidden}
-    .bubble{position:absolute;left:var(--x);top:var(--y);max-width:min(78%,320px);padding:11px 15px;border:1px solid rgba(116,151,169,.2);border-radius:18px;background:rgba(252,254,255,.96);box-shadow:0 12px 34px rgba(71,101,117,.14);font-size:14px;line-height:1.45;opacity:0;transform:translate(-50%,-40%) scale(.9) rotate(var(--rotate));backdrop-filter:blur(9px)}
-    .bubble strong{margin-right:5px;color:var(--clay-dark);font-size:12px}
-    .bubble-stage.active .bubble{animation:bubbleFloat 3.5s cubic-bezier(.2,.7,.25,1) var(--delay) both}
-    @keyframes bubbleFloat{0%{opacity:0;transform:translate(-50%,-18%) scale(.86) rotate(var(--rotate))}16%,70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-82%) scale(.96) rotate(var(--rotate))}}
-    .bubble.cloud{border-radius:24px 24px 24px 9px;box-shadow:0 12px 34px rgba(71,101,117,.13),10px 8px 0 rgba(255,255,255,.4)}
-    .bubble.sticker{display:flex;align-items:center;gap:8px;border:1px dashed hsla(var(--sticker-hue),55%,48%,.4);border-radius:10px;background:hsla(var(--sticker-hue),75%,96%,.95);color:hsl(var(--sticker-hue),35%,30%);box-shadow:4px 5px 0 hsla(var(--sticker-hue),55%,52%,.13)}
-    .bubble.sticker strong{color:hsl(var(--sticker-hue),45%,38%)}.sticker-icon{font-size:26px;filter:drop-shadow(0 3px 4px rgba(65,78,87,.16))}
-    .bubble-stage.active .bubble.sticker{animation:stickerDrop 3.5s cubic-bezier(.2,.8,.25,1.08) var(--delay) both}
-    @keyframes stickerDrop{0%{opacity:0;transform:translate(-50%,-80%) scale(.72) rotate(calc(var(--rotate) - 7deg))}18%,68%{opacity:1;transform:translate(-50%,-50%) scale(1.03) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-28%) scale(.92) rotate(calc(var(--rotate) + 4deg))}}
-    .bubble.emoji{display:flex;align-items:center;gap:8px;border:0;background:rgba(255,255,255,.83);border-radius:30px;box-shadow:0 10px 30px rgba(111,128,138,.14)}
-    .reaction-emoji{font-size:29px;line-height:1;filter:drop-shadow(0 3px 5px rgba(65,78,87,.12))}
-    .bubble-stage.active .bubble.emoji{animation:emojiPop 3.5s cubic-bezier(.18,.8,.25,1.12) var(--delay) both}
-    @keyframes emojiPop{0%{opacity:0;transform:translate(-50%,-35%) scale(.55) rotate(var(--rotate))}18%,70%{opacity:1;transform:translate(-50%,-50%) scale(1.05) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-70%) scale(.9) rotate(var(--rotate))}}
+    .bubble-stage{position:relative;inset:auto;width:100%;height:0;margin:0;overflow:hidden;z-index:0;pointer-events:none;transition:height .24s ease,margin .24s ease}
+    .bubble-stage.active{height:72px;margin:8px 0 4px}
+    .bubble{position:relative;display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border:1px solid rgba(91,132,151,.13);border-radius:12px;background:rgba(249,253,254,.48);box-shadow:0 5px 16px rgba(57,91,107,.04);color:#55717f;font-size:12.5px;line-height:1.5;opacity:0;backdrop-filter:blur(4px)}
+    .bubble strong{margin-right:5px;color:var(--clay-dark);font-size:11px;letter-spacing:.02em}
+    .observer-mark{flex:0 0 auto;color:#78a4b8;font-size:14px}
+    .bubble-stage.active .bubble{animation:observerIn 3.5s cubic-bezier(.2,.7,.25,1) both}
+    @keyframes observerIn{0%{opacity:0;transform:translateY(6px)}16%,74%{opacity:.82;transform:none}100%{opacity:0;transform:translateY(-4px)}}
     .ending{text-align:center;padding:14px 0 2px}
     .ending .icon{font-size:44px;margin-bottom:12px}
     .ending h2{margin:0 0 10px;font:500 32px/1.25 Georgia,"Songti SC",serif}
@@ -160,9 +153,6 @@
       .scene.active{display:block}
       .question{max-width:22ch}
       .ending h2{font-size:clamp(48px,5.7vw,76px)}
-      .bubble-stage{left:5vw;right:auto;top:350px;bottom:82px;width:min(430px,34vw);overflow:hidden;z-index:2;mask-image:linear-gradient(to bottom,transparent 0,#000 8%,#000 92%,transparent 100%)}
-      .bubble{width:min(calc(100% - 22px),320px);max-width:none;background:rgba(250,253,254,.62);box-shadow:0 8px 22px rgba(57,91,107,.06)}
-      .bubble.sticker>span:last-child,.bubble.emoji>span:last-child{min-width:0;flex:1 1 auto}
     }
     @media(max-width:700px){
       .page{width:min(100% - 26px,1120px);padding:13px 0}
@@ -173,16 +163,7 @@
       .two{grid-template-columns:1fr}
       .time-options{grid-template-columns:repeat(3,1fr)}
       .primary{width:100%}
-      .bubble-stage{position:relative;inset:auto;width:100%;height:0;margin:0;overflow:hidden;z-index:0;mask-image:none;transition:height .24s ease,margin .24s ease}
-      .bubble-stage.active{height:214px;margin:7px 0 13px}
-      .bubble{width:min(calc(100% - 28px),320px);max-width:none;padding:8px 11px;border-color:rgba(91,132,151,.14);background:rgba(249,253,254,.58);box-shadow:0 7px 20px rgba(57,91,107,.06);font-size:12px;line-height:1.38;backdrop-filter:blur(5px)}
-      .bubble strong{font-size:11px}
-      .bubble.cloud{box-shadow:0 7px 20px rgba(57,91,107,.07),6px 5px 0 rgba(255,255,255,.22)}
-      .bubble.sticker{gap:5px;background:hsla(var(--sticker-hue),70%,97%,.62);box-shadow:3px 4px 0 hsla(var(--sticker-hue),45%,52%,.07)}
-      .bubble.emoji{gap:5px;background:rgba(255,255,255,.56);box-shadow:0 7px 18px rgba(57,91,107,.06)}
-      .sticker-icon,.reaction-emoji{font-size:20px}
-      .bubble-stage.active .bubble,.bubble-stage.active .bubble.sticker,.bubble-stage.active .bubble.emoji{animation:mobileBubble 3.5s cubic-bezier(.2,.75,.25,1) var(--delay) both}
-      @keyframes mobileBubble{0%{opacity:0;transform:translate(-50%,-25%) scale(.9) rotate(var(--rotate))}17%,72%{opacity:.78;transform:translate(-50%,-50%) scale(1) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-70%) scale(.96) rotate(var(--rotate))}}
+      .bubble{font-size:12px}
       .ending .calendar-hint{display:block;margin:14px 0 2px;padding:11px 12px;border-left:2px solid rgba(84,124,148,.34);color:#738590;font-size:12px;line-height:1.65}
       .delivery-options,.guest-email-row{grid-template-columns:1fr}.delivery-option{min-height:auto}.guest-email-row .primary{width:100%}
     }
@@ -405,48 +386,27 @@
     });
     document.getElementById('date').min=new Date().toISOString().slice(0,10);
     const timeComments={
-      '上午':[['S','这个点见面，咖啡或早午茶都说得通'],['Z','也可能只是想把下午留给回味'],['双子座晨间播报','清醒得有一点可疑']],
-      '中午':[['S','这个时间不喝咖啡糊弄，直接约饭'],['Z','可以，先从菜单开始认真'],['菜单研究小组','本次会面已升级为一顿']],
-      '下午':[['S','咖啡和下午茶的黄金时段'],['Z','适合聊天，也适合假装只是聊天'],['INTJ 联席会议','议程合理，暧昧程度待评估']],
-      '晚上':[['S','那就直接吃饭，饭后再看要不要散步'],['Z','流程挺完整，像是早有预谋'],['双子座内部群聊','同意，但拒绝承认期待']],
-      '午夜':[['S｜紫老头','小酌加散步？这个时间认真的吗？'],['Z','月亮都上班了，我们为什么不能'],['日历本人','这已经不是咖啡局了吧']],
-      '待定':[['S','您这是把悬念也算进流程了'],['Z','给未来一点临场发挥'],['本次行程甲方','很好，谁都没有真正做决定']]
+      '上午':['晨间观察员','清醒得有一点可疑'],
+      '中午':['菜单研究小组','本次会面已升级为一顿'],
+      '下午':['INTJ 联席会议','议程合理，暧昧程度待评估'],
+      '晚上':['双子座内部群聊','同意，但拒绝承认期待'],
+      '午夜':['日历本人','这已经不是咖啡局了吧'],
+      '待定':['本次行程甲方','很好，谁都没有真正做决定']
     };
-    const bubbleVariants=['cloud','sticker','emoji'];
-    const reactionEmojis=['🫧','👀','☕️','🤨','✨','🫠','😌','🌙'];
-    const stickerIcons=['🪩','🥂','🛸','🎭','🧠','🌝','🫡','🧭'];
-    let hoverTimer,bubbleTimer,hasPlayedTimeComment=false;
-    function shuffle(items){return [...items].sort(()=>Math.random()-.5)}
-    function randomPosition(index){
-      if(matchMedia('(max-width:700px)').matches){
-        const mobileZones=[[48,18],[52,50],[50,82]],base=mobileZones[index];
-        const x=Math.max(46,Math.min(54,base[0]+(Math.random()*4-2)));
-        const y=Math.max(12,Math.min(88,base[1]+(Math.random()*8-4)));
-        return [`${x}%`,`${y}%`,`${(index*.1-.04).toFixed(2)}s`,`${(Math.random()*3-1.5).toFixed(1)}deg`];
-      }
-      const zones=[[47,27],[53,55],[50,80]],base=zones[index];
-      const x=Math.max(45,Math.min(55,base[0]+(Math.random()*4-2)));
-      const y=Math.max(20,Math.min(84,base[1]+(Math.random()*10-5)));
-      return [`${x}%`,`${y}%`,`${(index*.12-.05).toFixed(2)}s`,`${(Math.random()*6-3).toFixed(1)}deg`];
-    }
+    let hoverTimer,bubbleTimer,hasPlayedTimeComment=false,activeCommentSlot='';
     function showBubbles(slot){
       const stage=document.getElementById('bubbleStage'); stage.innerHTML='';
-      const variants=shuffle(bubbleVariants);
-      timeComments[slot].forEach(([speaker,text],index)=>{
-        const variant=variants[index],bubble=document.createElement('div'); bubble.className=`bubble ${variant}`;
-        const [x,y,delay,rotate]=randomPosition(index); bubble.style.cssText=`--x:${x};--y:${y};--delay:${delay};--rotate:${rotate};--sticker-hue:${Math.floor(Math.random()*320)}`;
-        if(variant==='sticker')bubble.innerHTML=`<span class="sticker-icon">${stickerIcons[Math.floor(Math.random()*stickerIcons.length)]}</span><span><strong>${speaker}：</strong>${text}</span>`;
-        else if(variant==='emoji')bubble.innerHTML=`<span class="reaction-emoji">${reactionEmojis[Math.floor(Math.random()*reactionEmojis.length)]}</span><span><strong>${speaker}：</strong>${text}</span>`;
-        else bubble.innerHTML=`<strong>${speaker}：</strong>${text}`;
-        stage.appendChild(bubble);
-      });
+      const [speaker,comment]=timeComments[slot],bubble=document.createElement('div');bubble.className='bubble observer';
+      bubble.innerHTML=`<span class="observer-mark">✦</span><span><strong>${speaker}：</strong>${comment}</span>`;
+      stage.appendChild(bubble);
       stage.classList.remove('active'); void stage.offsetWidth; stage.classList.add('active');
+      activeCommentSlot=slot;
       hasPlayedTimeComment=true; document.getElementById('timeOptions').classList.add('fast');
-      clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>{stage.classList.remove('active');stage.innerHTML=''},3900);
+      clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>{stage.classList.remove('active');stage.innerHTML='';activeCommentSlot=''},3900);
     }
     function clearBubbles(){
       clearTimeout(bubbleTimer);
-      const stage=document.getElementById('bubbleStage');stage.classList.remove('active');stage.innerHTML='';
+      activeCommentSlot='';const stage=document.getElementById('bubbleStage');stage.classList.remove('active');stage.innerHTML='';
     }
     const canHoverTimeChoices=matchMedia('(hover:hover) and (pointer:fine)').matches;
     document.querySelectorAll('.time-choice').forEach(button=>{
@@ -464,7 +424,7 @@
         document.querySelectorAll('.time-choice').forEach(item=>item.classList.toggle('active',item===button));
         const profile=outingProfile(),preview=document.getElementById('outingPreview');
         preview.textContent=profile.preview;preview.classList.add('show');
-        if(!canHoverTimeChoices)showBubbles(button.dataset.time);
+        if(activeCommentSlot!==button.dataset.time)showBubbles(button.dataset.time);
       });
     });
     document.getElementById('saveTime').onclick=()=>{
