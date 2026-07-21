@@ -605,7 +605,7 @@
       return {start:format(start),end:format(end)};
     }
     function downloadInvite(){
-      const description=`安排：${outingProfile().name}；Z 选择的时段：${timeText()}；预计时长：${durationText()}。`;
+      const description=`安排：${outingProfile().name}；我选择的时段：${timeText()}；预计时长：${durationText()}。`;
       const uid=`meeting-${state.date}-${Date.now()}@singhat.local`;
       const range=timedIcsRange();
       const dateLines=range
