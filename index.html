@@ -82,6 +82,10 @@
     .ending h2{margin:0 0 10px;font:500 32px/1.25 Georgia,"Songti SC",serif}
     .ending p{margin:6px 0;color:var(--muted);line-height:1.7}
     .calendar-hint{display:none}
+    .send-status{margin:12px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+    .send-status.success{color:#557d70}.send-status.error{color:#a15f63}
+    .retry-email{display:none;margin-top:3px;padding-left:0;text-align:left}
+    .retry-email.show{display:block}
     .modal{position:fixed;inset:0;z-index:10;display:none;place-items:center;padding:20px;background:rgba(52,47,41,.38);backdrop-filter:blur(7px)}
     .modal.show{display:grid}
     .dialog{width:min(100%,410px);padding:25px;border:1px solid rgba(255,255,255,.65);border-radius:23px;background:var(--paper);box-shadow:0 24px 75px rgba(45,37,31,.23);animation:pop .24s ease}
@@ -244,7 +248,7 @@
         <p class="lead">确认一下，没问题就把这天存进日历。</p>
         <div class="summary" id="summary"></div>
         <button class="primary" id="review">好，就这么定啦</button>
-        <p class="fineprint">不会发送邮件，也不需要留下任何信息。</p>
+        <p class="fineprint">确认后会把选择告诉 Singhat，不需要留下邮箱。</p>
       </section>
 
       <section class="scene" data-step="5">
@@ -253,8 +257,10 @@
           <h2>好滴，到时候见啦～</h2>
           <p>点一下，把这天存进日历。</p>
           <p id="hostPlaceEnding" class="hidden">地点我来选，选好告诉您。</p>
+          <p class="send-status" id="emailStatus" role="status"></p>
+          <button class="quiet retry-email" id="retryEmail">重新发送选择</button>
           <button class="primary" id="downloadIcs">下载日程 .ics</button>
-          <p class="calendar-hint">手机小提示：微信里若没有直接跳到日历，先保存到“文件”，再点开 .ics；能选择“日历”时直接选它就好。</p>
+          <p class="calendar-hint">Apple 日历小提示：微信里先下载并保存 .ics，再从“文件”中点开；iPhone 可加入日历，Mac 会用“日历”打开。</p>
           <button class="quiet" onclick="location.reload()">再看一遍</button>
         </div>
       </section>
@@ -280,7 +286,10 @@
   </div>
 
   <script>
-    const config={inviterName:'Singhat'};
+    const config={
+      inviterName:'Singhat',
+      emailjs:{publicKey:'Lk-X17zSnfT3gcQNa',serviceId:'service_ws6khg9',templateId:'template_vozvyma'}
+    };
     const state={date:'',time:'',duration:'60',placeMode:'',place:''};
     const titles=[
       ['有件不太紧急，<br>但想认真问您的事。','不会占用很久，大概只需要一点好奇心。'],
@@ -419,6 +428,45 @@
     function durationText(){return state.duration==='open'?'不设结束时间，看情况':state.duration==='120'?'约 2 小时':'约 1 小时'}
     function dateText(){if(!state.date)return'';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${state.date}T00:00:00`))}
     function renderSummary(){document.getElementById('summary').innerHTML=`<b>时间</b>　${dateText()} ${safe(state.time)}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
+    function emailTitle(){return `${dateText()}｜${state.time}｜${durationText()}｜${state.place}`}
+    async function sendSelectionEmail(){
+      const response=await fetch('https://api.emailjs.com/api/v1.0/email/send',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          service_id:config.emailjs.serviceId,
+          template_id:config.emailjs.templateId,
+          user_id:config.emailjs.publicKey,
+          template_params:{
+            name:config.inviterName,
+            title:emailTitle(),
+            date:dateText(),
+            time:state.time,
+            duration:durationText(),
+            place:state.place,
+            message:`Z 已确认：${emailTitle()}`
+          }
+        })
+      });
+      if(!response.ok)throw new Error(await response.text()||'邮件发送失败');
+    }
+    let emailSendInFlight=false,emailSent=false;
+    async function notifySelection(){
+      const status=document.getElementById('emailStatus'),retry=document.getElementById('retryEmail');
+      if(emailSendInFlight||emailSent)return;
+      emailSendInFlight=true;retry.disabled=true;
+      status.className='send-status';status.textContent='正在把您的选择告诉 Singhat…';retry.classList.remove('show');
+      try{
+        await sendSelectionEmail();
+        emailSent=true;
+        status.className='send-status success';status.textContent='✓ Singhat 已收到您的选择。';
+      }catch(error){
+        console.error(error);
+        status.className='send-status error';status.textContent='通知暂时没发出去，日程仍然可以正常下载。';retry.classList.add('show');
+      }finally{
+        emailSendInFlight=false;retry.disabled=false;
+      }
+    }
     function icsDate(dateString){return dateString.replaceAll('-','')}
     function nextIcsDate(dateString){
       const date=new Date(`${dateString}T12:00:00Z`); date.setUTCDate(date.getUTCDate()+1);
@@ -442,7 +490,9 @@
     document.getElementById('review').onclick=()=>{
       go(5);
       document.getElementById('hostPlaceEnding').classList.toggle('hidden',state.placeMode!=='host');
+      notifySelection();
     };
+    document.getElementById('retryEmail').onclick=notifySelection;
     document.getElementById('downloadIcs').onclick=downloadInvite;
     const cursorOrb=document.getElementById('cursorOrb');
     if(matchMedia('(pointer:fine)').matches){
