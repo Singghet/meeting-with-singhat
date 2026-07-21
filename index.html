@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f2eee5">
-  <title>想和您约杯咖啡</title>
+  <title>想和您见个面</title>
   <style>
     :root {
       --canvas:#eff8fc; --paper:#fbfdfe; --ink:#35404a; --muted:#7b8790;
@@ -117,10 +117,9 @@
     .page{width:min(100% - 56px,1120px);min-height:100svh;padding:30px 0;place-items:stretch;align-items:center}
     .card{min-height:min(820px,calc(100svh - 60px));display:flex;flex-direction:column;justify-content:center;overflow:visible;border:0;border-radius:0;padding:80px 5vw 55px;background:transparent!important;box-shadow:none;backdrop-filter:none}
     .stage-meta{position:absolute;left:5vw;right:5vw;top:18px;display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(74,103,118,.25);color:#617784;font-size:10px;font-weight:750;letter-spacing:.2em;text-transform:uppercase}
-    .meta-mark{display:grid;place-items:center;width:42px;height:25px;color:#6f8996;opacity:.28}
-    .meta-mark svg{width:42px;height:25px;overflow:visible}
+    .meta-mark{color:#58778a;font-size:11px;font-weight:760;letter-spacing:.12em}
     .kicker{margin-bottom:10px;color:#547c94;font-size:10px;letter-spacing:.26em}
-    h1{max-width:900px;margin:0 0 18px;font-family:Arial,"PingFang SC",sans-serif;font-size:clamp(48px,8.5vw,108px);font-weight:720;line-height:.98;letter-spacing:-.065em}
+    h1{max-width:820px;margin:0 0 18px;font-family:Arial,"PingFang SC",sans-serif;font-size:clamp(44px,6.7vw,78px);font-weight:720;line-height:1.02;letter-spacing:-.055em}
     .headline-line{display:block;overflow:hidden;padding-right:.08em}
     .char{display:inline-block;animation:charIn .72s cubic-bezier(.16,.8,.28,1) calc(var(--i)*18ms) both}
     @keyframes charIn{from{opacity:0;transform:translateY(105%) rotate(2deg)}to{opacity:1;transform:none}}
@@ -151,15 +150,14 @@
     .time-choice{border:1px solid rgba(91,121,137,.26);border-radius:999px;background:rgba(255,255,255,.35);transform:translate(var(--mx,0),var(--my,0));transition:background .2s ease,border-color .2s ease,transform .18s ease}
     .time-choice:hover{transform:translate(var(--mx,0),var(--my,0));background:rgba(255,255,255,.7)}
     .time-choice.active{background:#ddecf3;border-color:#78a4b8;box-shadow:none}
+    .outing-preview{min-height:24px;margin:13px 0 0;color:#58778a;font-size:13px;line-height:1.55;opacity:0;transform:translateY(5px);transition:opacity .3s ease,transform .3s ease}
+    .outing-preview.show{opacity:1;transform:none}
     .primary{width:auto;min-width:210px;border-radius:999px;padding:15px 26px;background:#344b58;border-color:#344b58;transform:translate(var(--mx,0),var(--my,0));transition:transform .18s ease,background .2s ease}
     .primary:hover{background:#52788c;border-color:#52788c;transform:translate(var(--mx,0),var(--my,0))}
     .summary{border-radius:0;border-width:1px 0;background:rgba(255,255,255,.22)}
     .dialog{border-radius:4px;background:rgba(250,253,255,.96)}
     .dialog-actions button{border-radius:999px}
     .ending{text-align:left}.ending .icon{font-size:52px}.ending h2{font-family:Arial,"PingFang SC",sans-serif;font-size:clamp(44px,7vw,82px);font-weight:730;letter-spacing:-.06em}
-    .cursor-orb{position:fixed;z-index:30;left:0;top:0;width:18px;height:18px;border:1px solid rgba(50,72,83,.55);border-radius:50%;pointer-events:none;opacity:0;transform:translate(-50%,-50%);transition:width .25s ease,height .25s ease,background .25s ease,opacity .2s ease;mix-blend-mode:multiply}
-    .cursor-orb.big{width:50px;height:50px;background:rgba(145,196,218,.22);border-color:rgba(77,116,135,.24)}
-    @media(pointer:fine){body:hover .cursor-orb{opacity:1}}
     @media(max-width:700px){
       .page{width:min(100% - 26px,1120px);padding:13px 0}
       .card{min-height:calc(100svh - 26px);padding:78px 6px 50px}
@@ -178,25 +176,23 @@
       .delivery-options,.guest-email-row{grid-template-columns:1fr}.delivery-option{min-height:auto}.guest-email-row .primary{width:100%}
       .steam{display:none}
     }
-    @media(pointer:coarse),(prefers-reduced-motion:reduce){.cursor-orb{display:none}.char,.scene.active{animation-duration:.01ms!important}.option,.time-choice,.primary{transform:none!important}}
+    @media(pointer:coarse){.option,.time-choice,.primary{transform:none!important}}
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+      .option,.time-choice,.primary{transform:none!important}
+    }
+    @media(prefers-reduced-transparency:reduce){.modal{backdrop-filter:none;background:rgba(52,47,41,.72)}.bubble{backdrop-filter:none;background:#fbfdfe}}
   </style>
 </head>
 <body data-step="0">
-  <div class="cursor-orb" id="cursorOrb" aria-hidden="true"></div>
   <main class="page">
     <section class="card">
       <div class="stage-meta">
-        <span id="chapterCount">01 / 05</span>
-        <span class="meta-mark" aria-label="餐盘">
-          <svg viewBox="0 0 50 30" role="img" aria-hidden="true">
-            <ellipse cx="25" cy="15" rx="12" ry="10" fill="none" stroke="currentColor" stroke-width="1.2"/>
-            <ellipse cx="25" cy="15" rx="7.5" ry="6" fill="none" stroke="currentColor" stroke-width=".8"/>
-            <path d="M5 5v20M2.5 5v7c0 2 5 2 5 0V5M45 5c-3 4-3 9 0 11v9" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
-          </svg>
-        </span>
+        <span id="sceneLabel">先听我说</span>
+        <span class="meta-mark">S × Z</span>
       </div>
       <div class="steam" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="kicker">A small question</div>
+      <div class="kicker">有件小事</div>
       <h1 id="pageTitle">有件不太紧急，<br>但想认真问您的事。</h1>
       <p class="lead" id="pageLead">不会占用很久，大概只需要一点好奇心。</p>
       <div class="progress" aria-label="进度"><span class="on"></span><span></span><span></span><span></span><span></span></div>
@@ -212,7 +208,7 @@
       </section>
 
       <section class="scene" data-step="1">
-        <p class="question">想找个时间，和您约 ☕️ 啊，可以嘛？</p>
+        <p class="question">想找个时间，约您出来，可以嘛？</p>
         <div class="options">
           <button class="option" data-go="2">可以呀</button>
           <button class="option" data-dialog="busy">最近有点忙</button>
@@ -225,12 +221,12 @@
         <p class="lead">不用迁就我，您选好，我负责出现。</p>
         <div class="two">
           <div class="field"><label for="date">日期</label><input id="date" type="date"></div>
-          <div class="field"><label>大概什么时间</label><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午"><span>上午</span><small>08:00—11:00</small></button><button class="time-choice" data-time="中午"><span>中午</span><small>11:30—13:30</small></button><button class="time-choice" data-time="下午"><span>下午</span><small>14:00—17:00</small></button><button class="time-choice" data-time="晚上"><span>晚上</span><small>18:00—22:00</small></button><button class="time-choice" data-time="午夜"><span>午夜</span><small>23:00—次日 01:00</small></button><button class="time-choice" data-time="待定"><span>待定</span><small>保留一点悬念</small></button></div></div>
+          <div class="field"><label>大概什么时间</label><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午"><span>上午</span><small>08:00-11:00</small></button><button class="time-choice" data-time="中午"><span>中午</span><small>11:30-13:30</small></button><button class="time-choice" data-time="下午"><span>下午</span><small>14:00-17:00</small></button><button class="time-choice" data-time="晚上"><span>晚上</span><small>18:00-22:00</small></button><button class="time-choice" data-time="午夜"><span>午夜</span><small>23:00-次日 01:00</small></button><button class="time-choice" data-time="待定"><span>待定</span><small>保留一点悬念</small></button></div><p class="outing-preview" id="outingPreview" aria-live="polite"></p></div>
         </div>
         <div class="field">
-          <label for="duration">您打算分给这杯咖啡多久？</label>
+          <label for="duration">您想为这次见面留多久？</label>
           <select id="duration">
-            <option value="60">先喝一杯，约 1 小时</option>
+            <option value="60">先约 1 小时</option>
             <option value="120">可以慢慢聊，约 2 小时</option>
             <option value="open">不设结束时间，看情况</option>
           </select>
@@ -239,11 +235,11 @@
       </section>
 
       <section class="scene" data-step="3">
-        <p class="question">想在哪里见面？</p>
+        <p class="question" id="placeQuestion">想在哪里见面？</p>
         <div class="options" id="placeChoices">
-          <button class="option" data-place="self">我有想去的地方</button>
+          <button class="option" id="placeSelf" data-place="self">我有想去的地方</button>
           <button class="option" data-place="host">您来选吧</button>
-          <button class="option" data-dialog="coffee">只要咖啡好喝就行</button>
+          <button class="option" id="placeLoose" data-dialog="outing">舒服就行，您来选</button>
         </div>
         <div class="field hidden" id="placeField">
           <label for="place">您想去哪里？</label>
@@ -263,7 +259,7 @@
 
       <section class="scene" data-step="5">
         <div class="ending">
-          <div class="icon">☕️</div>
+          <div class="icon" id="endingIcon">☕️</div>
           <h2>好滴，到时候见啦～</h2>
           <p>点一下，把这天存进日历。</p>
           <p id="hostPlaceEnding" class="hidden">地点我来选，选好告诉您。</p>
@@ -323,17 +319,26 @@
       '午夜':{start:'23:00',end:'01:00',endNextDay:true},
       '待定':null
     };
+    const outingProfiles={
+      '上午':{type:'cafe',name:'咖啡或早午茶',calendar:'Coffee with Singhat',icon:'☕️',preview:'上午适合咖啡，也可以顺便吃个早午茶。',stepTitle:'找一家舒服的店。',stepLead:'上午的安排，不必太匆忙。',question:'咖啡或早午茶，想去哪里？',selfChoice:'我有想去的店',looseChoice:'舒服好喝就行',dialogTitle:'那就交给我。',dialogText:'我来找一家舒服、咖啡也过关的店。'},
+      '中午':{type:'meal',name:'午饭',calendar:'Lunch with Singhat',icon:'🍜',preview:'中午就不拿咖啡糊弄了，直接约饭。',stepTitle:'这次直接约饭。',stepLead:'选一家想吃的，剩下的交给见面。',question:'这顿午饭，想去哪里吃？',selfChoice:'我有想吃的店',looseChoice:'好吃就行，您来选',dialogTitle:'好，那我来找。',dialogText:'按约饭的标准来，不拿一杯咖啡敷衍您。'},
+      '下午':{type:'cafe',name:'咖啡或下午茶',calendar:'Afternoon tea with Singhat',icon:'☕️',preview:'下午适合咖啡、甜点，以及慢一点的聊天。',stepTitle:'找一家能坐久一点的店。',stepLead:'咖啡或下午茶，都可以慢慢来。',question:'咖啡或下午茶，想去哪里？',selfChoice:'我有想去的店',looseChoice:'咖啡好喝就行',dialogTitle:'这个要求合理。',dialogText:'我来找一家适合聊天、咖啡也过关的店。'},
+      '晚上':{type:'meal',name:'晚饭',calendar:'Dinner with Singhat',icon:'🍽️',preview:'晚上就直接约饭，饭后要不要散步再看心情。',stepTitle:'那就一起吃顿饭。',stepLead:'先把晚饭定下来，其他的到时候再说。',question:'这顿晚饭，想去哪里吃？',selfChoice:'我有想吃的店',looseChoice:'好吃就行，您来选',dialogTitle:'好，那我来订方向。',dialogText:'先认真找家适合吃饭的店，饭后的安排临场决定。'},
+      '午夜':{type:'night',name:'小酌或散步',calendar:'A drink or walk with Singhat',icon:'🌙',preview:'午夜不喝咖啡了，小酌或散步比较合理。',stepTitle:'夜深了，换个轻松的安排。',stepLead:'小酌，散步，或者两样都来一点。',question:'小酌或散步，想从哪里开始？',selfChoice:'我有想去的地方',looseChoice:'安静一点就行',dialogTitle:'明白，夜间模式。',dialogText:'我来找个适合小酌或散步的起点。'},
+      '待定':{type:'open',name:'见面方式待定',calendar:'Meeting with Singhat',icon:'✨',preview:'先把见面留住，具体做什么可以晚点决定。',stepTitle:'方式可以晚点再定。',stepLead:'先决定在哪里碰面，也已经足够。',question:'那想在哪里见面？',selfChoice:'我有想去的地方',looseChoice:'您看着选吧',dialogTitle:'那就保留一点悬念。',dialogText:'地点我来想，见面的方式到时候再决定。'}
+    };
+    const sceneLabels=['先听我说','问个问题','选个时间','选个地方','确认一下','到时候见','下次再说'];
     const titles=[
       ['有件不太紧急，<br>但想认真问您的事。','不会占用很久，大概只需要一点好奇心。'],
       ['那我就直接问啦。',''],['时间由您来定。',''],['再决定一个地方。',''],['最后确认一下。',''],['',''],['','']
     ];
     const dialogs={
       guess:{emoji:'🙂',title:'那您猜得准嘛？',text:'如果猜的是“有人想见您”，那确实猜对了一点。',actions:[['继续听听',1,true],['我再猜猜',0,false]]},
-      type:{emoji:'☕️',title:'是需要您亲自出现的事。',text:'不严肃，也不复杂，最好还能有杯咖啡。',actions:[['好，继续说',1,true]]},
+      type:{emoji:'☕️',title:'是需要您亲自出现的事。',text:'不严肃，也不复杂，找个地方一起坐坐就好。',actions:[['好，继续说',1,true]]},
       busy:{emoji:'📅',title:'是时间不太好找嘛？',text:'时间可以完全由您来定。如果只是最近不想约，也可以直接说，没关系呀。',actions:[['那我挑个时间',2,true],['最近先不约啦',6,false]]},
       consider:{emoji:'🌿',title:'当然可以。',text:'您可以慢慢想，这里不催。',actions:[['我想好了，继续',2,true],['今天先到这',6,false]]},
       timeSaved:{emoji:'✓',title:'时间记住啦。',text:'看起来那天从现在开始，稍微有点不一样。',actions:[['接着选地点',3,true]]},
-      coffee:{emoji:'☕️',title:'这个要求不过分。',text:'收到，地点我来选，尽量保证咖啡好喝。',actions:[['好呀',4,true,'host'],['我还是自己选',3,false,'self']]},
+      outing:{emoji:'☕️',title:'那就交给我。',text:'我来找个合适的地方。',actions:[['好呀',4,true,'host'],['我还是自己选',3,false,'self']]},
       missing:{emoji:'✎',title:'还差一点点。',text:'请先把这一页的信息填完整。',actions:[['我补一下',null,true]]}
     };
     const scenes=[...document.querySelectorAll('.scene')];
@@ -352,10 +357,11 @@
       scenes.forEach(s=>{s.classList.remove('leaving');s.classList.toggle('active',Number(s.dataset.step)===step)});
       dots.forEach((d,i)=>d.classList.toggle('on',i<=Math.min(step,4)));
       document.body.dataset.step=String(step);
-      const [title,lead]=titles[step]||['',''];
+      let [title,lead]=titles[step]||['',''];
+      if(step===3){const profile=outingProfile();title=profile.stepTitle;lead=profile.stepLead;renderOutingScene()}
       renderTitle(title);
       document.getElementById('pageLead').textContent=lead;
-      document.getElementById('chapterCount').textContent=`${String(Math.min(step+1,5)).padStart(2,'0')} / 05`;
+      document.getElementById('sceneLabel').textContent=sceneLabels[step]||'';
       document.querySelector('.progress').classList.toggle('hidden',step>4);
       activeStep=step;
       window.scrollTo({top:0,behavior:'smooth'});
@@ -368,7 +374,11 @@
       transitionTimer=setTimeout(()=>applyStep(step),220);
     }
     function openDialog(key){
-      const d=dialogs[key];
+      let d=dialogs[key];
+      if(key==='outing'){
+        const profile=outingProfile();
+        d={...d,emoji:profile.icon,title:profile.dialogTitle,text:profile.dialogText};
+      }
       document.getElementById('dialogEmoji').textContent=d.emoji;
       document.getElementById('dialogTitle').textContent=d.title;
       document.getElementById('dialogText').textContent=d.text;
@@ -390,10 +400,10 @@
     });
     document.getElementById('date').min=new Date().toISOString().slice(0,10);
     const timeComments={
-      '上午':[['S','这个点见面，看来您对咖啡是认真的'],['Z','也可能只是想把下午留给回味'],['双子座晨间播报','清醒得有一点可疑']],
-      '中午':[['S','那就别只喝咖啡了，顺便吃饭？'],['Z','先吃饭，咖啡负责续场'],['菜单研究小组','已自动从一杯升级为一顿']],
-      '下午':[['S','咖啡的黄金时段，稳妥得不像双子'],['Z','适合聊天，也适合假装只是聊天'],['INTJ 联席会议','议程合理，暧昧程度待评估']],
-      '晚上':[['S','吃饭、小酌，再散个步？'],['Z','流程挺完整，像是早有预谋'],['双子座内部群聊','同意，但拒绝承认期待']],
+      '上午':[['S','这个点见面，咖啡或早午茶都说得通'],['Z','也可能只是想把下午留给回味'],['双子座晨间播报','清醒得有一点可疑']],
+      '中午':[['S','这个时间不喝咖啡糊弄，直接约饭'],['Z','可以，先从菜单开始认真'],['菜单研究小组','本次会面已升级为一顿']],
+      '下午':[['S','咖啡和下午茶的黄金时段'],['Z','适合聊天，也适合假装只是聊天'],['INTJ 联席会议','议程合理，暧昧程度待评估']],
+      '晚上':[['S','那就直接吃饭，饭后再看要不要散步'],['Z','流程挺完整，像是早有预谋'],['双子座内部群聊','同意，但拒绝承认期待']],
       '午夜':[['S｜紫老头','小酌加散步？这个时间认真的吗？'],['Z','月亮都上班了，我们为什么不能'],['日历本人','这已经不是咖啡局了吧']],
       '待定':[['S','您这是把悬念也算进流程了'],['Z','给未来一点临场发挥'],['本次行程甲方','很好，谁都没有真正做决定']]
     };
@@ -441,6 +451,8 @@
         clearTimeout(hoverTimer);
         state.time=button.dataset.time;
         document.querySelectorAll('.time-choice').forEach(item=>item.classList.toggle('active',item===button));
+        const profile=outingProfile(),preview=document.getElementById('outingPreview');
+        preview.textContent=profile.preview;preview.classList.add('show');
         if(!canHoverTimeChoices)showBubbles(button.dataset.time);
       });
     });
@@ -453,15 +465,22 @@
       if(button.dataset.place==='self')showPlaceInput();
       else{state.placeMode='host';state.place='TBD by Singhat';renderSummary();go(4)}
     });
+    function outingProfile(){return outingProfiles[state.time]||outingProfiles['待定']}
+    function renderOutingScene(){
+      const profile=outingProfile();
+      document.getElementById('placeQuestion').textContent=profile.question;
+      document.getElementById('placeSelf').textContent=profile.selfChoice;
+      document.getElementById('placeLoose').textContent=profile.looseChoice;
+    }
     function showPlaceInput(){document.getElementById('placeChoices').classList.add('hidden');document.getElementById('placeField').classList.remove('hidden');document.getElementById('place').focus()}
     document.getElementById('backToPlaces').onclick=()=>{document.getElementById('placeChoices').classList.remove('hidden');document.getElementById('placeField').classList.add('hidden')};
     document.getElementById('savePlace').onclick=()=>{const place=document.getElementById('place').value.trim();if(!place){openDialog('missing');return}state.placeMode='self';state.place=place;renderSummary();go(4)};
     function safe(value){const div=document.createElement('div');div.textContent=value;return div.innerHTML}
     function durationText(){return state.duration==='open'?'不设结束时间，看情况':state.duration==='120'?'约 2 小时':'约 1 小时'}
     function dateText(){if(!state.date)return'';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${state.date}T00:00:00`))}
-    function timeText(){const slot=timeSlots[state.time];return slot?`${state.time} · ${slot.start}—${slot.endNextDay?'次日 ':''}${slot.end}`:state.time}
-    function renderSummary(){document.getElementById('summary').innerHTML=`<b>时间</b>　${dateText()} ${safe(timeText())}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
-    function emailTitle(){return `${dateText()}｜${timeText()}｜${durationText()}｜${state.place}`}
+    function timeText(){const slot=timeSlots[state.time];return slot?`${state.time} · ${slot.start}-${slot.endNextDay?'次日 ':''}${slot.end}`:state.time}
+    function renderSummary(){document.getElementById('summary').innerHTML=`<b>这次</b>　${safe(outingProfile().name)}<br><b>时间</b>　${dateText()} ${safe(timeText())}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
+    function emailTitle(){return `${dateText()}｜${outingProfile().name}｜${timeText()}｜${durationText()}｜${state.place}`}
     let emailQueue=Promise.resolve(),lastEmailRequestAt=0;
     function sendEmail(templateId,templateParams){
       emailQueue=emailQueue.catch(()=>{}).then(async()=>{
@@ -492,6 +511,7 @@
         title:emailTitle(),
         date:dateText(),
         time:timeText(),
+        outing:outingProfile().name,
         duration:durationText(),
         place:state.place,
         message:`Z 已确认：${emailTitle()}`,
@@ -537,7 +557,7 @@
       return {start:format(start),end:format(end)};
     }
     function downloadInvite(){
-      const description=`Z 选择的时段：${timeText()}；预计时长：${durationText()}。`;
+      const description=`安排：${outingProfile().name}；Z 选择的时段：${timeText()}；预计时长：${durationText()}。`;
       const uid=`meeting-${state.date}-${Date.now()}@singhat.local`;
       const range=timedIcsRange();
       const dateLines=range
@@ -546,7 +566,7 @@
       const content=[
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Singhat//Meeting Invitation//CN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
         'BEGIN:VEVENT',`UID:${uid}`,`DTSTAMP:${icsTimestamp()}`,...dateLines,
-        'SUMMARY:Meeting with Singhat ☕️',`LOCATION:${escapeIcs(state.place)}`,`DESCRIPTION:${escapeIcs(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR'
+        `SUMMARY:${escapeIcs(outingProfile().calendar)}`,`LOCATION:${escapeIcs(state.place)}`,`DESCRIPTION:${escapeIcs(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR'
       ].join('\r\n');
       const blob=new Blob([content],{type:'text/calendar;charset=utf-8'}),link=document.createElement('a');
       const url=URL.createObjectURL(blob);
@@ -579,27 +599,12 @@
     };
     document.getElementById('review').onclick=()=>{
       go(5);
+      document.getElementById('endingIcon').textContent=outingProfile().icon;
       document.getElementById('hostPlaceEnding').classList.toggle('hidden',state.placeMode!=='host');
       notifySelection();
     };
     document.getElementById('retryEmail').onclick=notifySelection;
     document.getElementById('downloadIcs').onclick=downloadInvite;
-    const cursorOrb=document.getElementById('cursorOrb');
-    if(matchMedia('(pointer:fine)').matches){
-      document.addEventListener('pointermove',event=>{
-        cursorOrb.style.transform=`translate(${event.clientX-9}px,${event.clientY-9}px)`;
-        const magnetic=event.target.closest('button');
-        if(!magnetic)return;
-        const rect=magnetic.getBoundingClientRect();
-        magnetic.style.setProperty('--mx',`${(event.clientX-rect.left-rect.width/2)*.07}px`);
-        magnetic.style.setProperty('--my',`${(event.clientY-rect.top-rect.height/2)*.07}px`);
-      });
-      document.addEventListener('pointerover',event=>{if(event.target.closest('button'))cursorOrb.classList.add('big')});
-      document.addEventListener('pointerout',event=>{
-        const button=event.target.closest('button');
-        if(button&&!button.contains(event.relatedTarget)){button.style.setProperty('--mx','0px');button.style.setProperty('--my','0px');cursorOrb.classList.remove('big')}
-      });
-    }
     renderTitle(titles[0][0]);
   </script>
 </body>
