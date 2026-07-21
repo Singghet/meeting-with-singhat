@@ -171,11 +171,15 @@
       .two{grid-template-columns:1fr}
       .time-options{grid-template-columns:repeat(3,1fr)}
       .primary{width:100%}
-      .bubble-stage{inset:104px 6px 54px;overflow:visible}
-      .bubble{width:max-content;max-width:calc(100% - 22px);padding:10px 13px;font-size:13px;line-height:1.42}
+      .bubble-stage{position:fixed;inset:68px 10px auto;height:min(29svh,230px);overflow:hidden;z-index:8;mask-image:linear-gradient(to bottom,transparent 0,#000 9%,#000 88%,transparent 100%)}
+      .bubble{width:max-content;max-width:calc(100% - 28px);padding:8px 11px;border-color:rgba(91,132,151,.14);background:rgba(249,253,254,.64);box-shadow:0 7px 20px rgba(57,91,107,.07);font-size:12px;line-height:1.38;backdrop-filter:blur(5px)}
       .bubble strong{font-size:11px}
-      .bubble.sticker,.bubble.emoji{gap:6px}
-      .sticker-icon,.reaction-emoji{font-size:23px}
+      .bubble.cloud{box-shadow:0 7px 20px rgba(57,91,107,.07),6px 5px 0 rgba(255,255,255,.22)}
+      .bubble.sticker{gap:5px;background:hsla(var(--sticker-hue),70%,97%,.62);box-shadow:3px 4px 0 hsla(var(--sticker-hue),45%,52%,.07)}
+      .bubble.emoji{gap:5px;background:rgba(255,255,255,.56);box-shadow:0 7px 18px rgba(57,91,107,.06)}
+      .sticker-icon,.reaction-emoji{font-size:20px}
+      .bubble-stage.active .bubble,.bubble-stage.active .bubble.sticker,.bubble-stage.active .bubble.emoji{animation:mobileBubble 3.5s cubic-bezier(.2,.75,.25,1) var(--delay) both}
+      @keyframes mobileBubble{0%{opacity:0;transform:translate(-50%,-25%) scale(.9) rotate(var(--rotate))}17%,72%{opacity:.78;transform:translate(-50%,-50%) scale(1) rotate(var(--rotate))}100%{opacity:0;transform:translate(-50%,-70%) scale(.96) rotate(var(--rotate))}}
       .ending .calendar-hint{display:block;margin:14px 0 2px;padding:11px 12px;border-left:2px solid rgba(84,124,148,.34);color:#738590;font-size:12px;line-height:1.65}
       .delivery-options,.guest-email-row{grid-template-columns:1fr}.delivery-option{min-height:auto}.guest-email-row .primary{width:100%}
     }
@@ -415,8 +419,10 @@
     function shuffle(items){return [...items].sort(()=>Math.random()-.5)}
     function randomPosition(index){
       if(matchMedia('(max-width:700px)').matches){
-        const mobileY=[22,49,74][index];
-        return [`${50+(Math.random()*6-3)}%`,`${mobileY+(Math.random()*8-4)}%`,`${(index*.12-.05).toFixed(2)}s`,`${(Math.random()*4-2).toFixed(1)}deg`];
+        const mobileZones=[[32,19],[67,50],[43,81]],base=mobileZones[index];
+        const x=Math.max(22,Math.min(78,base[0]+(Math.random()*10-5)));
+        const y=Math.max(12,Math.min(88,base[1]+(Math.random()*8-4)));
+        return [`${x}%`,`${y}%`,`${(index*.1-.04).toFixed(2)}s`,`${(Math.random()*3-1.5).toFixed(1)}deg`];
       }
       const zones=[[24,25],[70,48],[38,76]],base=zones[index];
       const x=Math.max(14,Math.min(86,base[0]+(Math.random()*18-9)));
@@ -437,6 +443,10 @@
       stage.classList.remove('active'); void stage.offsetWidth; stage.classList.add('active');
       hasPlayedTimeComment=true; document.getElementById('timeOptions').classList.add('fast');
       clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>{stage.classList.remove('active');stage.innerHTML=''},3900);
+    }
+    function clearBubbles(){
+      clearTimeout(bubbleTimer);
+      const stage=document.getElementById('bubbleStage');stage.classList.remove('active');stage.innerHTML='';
     }
     const canHoverTimeChoices=matchMedia('(hover:hover) and (pointer:fine)').matches;
     document.querySelectorAll('.time-choice').forEach(button=>{
@@ -460,7 +470,7 @@
     document.getElementById('saveTime').onclick=()=>{
       const date=document.getElementById('date').value,time=state.time;
       if(!date||!time){openDialog('missing');return}
-      Object.assign(state,{date,time,duration:document.getElementById('duration').value});openDialog('timeSaved');
+      Object.assign(state,{date,time,duration:document.getElementById('duration').value});clearBubbles();openDialog('timeSaved');
     };
     document.querySelectorAll('[data-place]').forEach(button=>button.onclick=()=>{
       if(button.dataset.place==='self')showPlaceInput();
