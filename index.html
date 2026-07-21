@@ -299,6 +299,7 @@
   <script>
     const config={
       inviterName:'Singhat',
+      hostEmail:'senhaiti@hotmail.com',
       emailjs:{
         publicKey:'Lk-X17zSnfT3gcQNa',serviceId:'service_ws6khg9',
         hostTemplateId:'template_vozvyma',guestTemplateId:'template_5nq7qkr'
@@ -519,7 +520,11 @@
       };
     }
     function sendSelectionEmail(){
-      return sendEmail(config.emailjs.hostTemplateId,emailParams());
+      return sendEmail(config.emailjs.hostTemplateId,emailParams({
+        to_email:config.hostEmail,
+        email:config.hostEmail,
+        to_name:config.inviterName
+      }));
     }
     let emailSendInFlight=false,emailSent=false;
     async function notifySelection(){
