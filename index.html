@@ -455,6 +455,7 @@
     let emailQueue=Promise.resolve(),lastEmailRequestAt=0;
     function sendEmail(templateId,templateParams){
       emailQueue=emailQueue.catch(()=>{}).then(async()=>{
+        if(location.protocol==='file:')throw new Error('请从线上链接打开；直接双击本地文件时无法发送邮件。');
         const wait=Math.max(0,1100-(Date.now()-lastEmailRequestAt));
         if(wait)await new Promise(resolve=>setTimeout(resolve,wait));
         lastEmailRequestAt=Date.now();
@@ -468,7 +469,10 @@
             template_params:templateParams
           })
         });
-        if(!response.ok)throw new Error(await response.text()||'邮件发送失败');
+        if(!response.ok){
+          const detail=(await response.text()).trim();
+          throw new Error(detail||`邮件服务返回 ${response.status}`);
+        }
       });
       return emailQueue;
     }
@@ -499,7 +503,7 @@
         status.className='send-status success';status.textContent='✓ Singhat 已收到您的选择。';
       }catch(error){
         console.error(error);
-        status.className='send-status error';status.textContent='通知暂时没发出去，日程仍然可以正常下载。';retry.classList.add('show');
+        status.className='send-status error';status.textContent=`通知没发出去：${error.message}`;retry.classList.add('show');
       }finally{
         emailSendInFlight=false;retry.disabled=false;
       }
@@ -545,7 +549,7 @@
         await sendEmail(config.emailjs.guestTemplateId,emailParams({to_email:input.value.trim(),email:input.value.trim()}));
         guestEmailSent=true;input.disabled=true;status.className='send-status success';status.textContent='✓ 已经发到您的邮箱啦，请留意收件箱。';
       }catch(error){
-        console.error(error);status.className='send-status error';status.textContent='暂时没发出去，请检查邮箱后再试一次。';button.disabled=false;
+        console.error(error);status.className='send-status error';status.textContent=`暂时没发出去：${error.message}`;button.disabled=false;
       }finally{guestEmailInFlight=false}
     };
     document.getElementById('review').onclick=()=>{
