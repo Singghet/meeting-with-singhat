@@ -480,8 +480,14 @@
     function durationText(){return state.duration==='open'?'不设结束时间，看情况':state.duration==='120'?'约 2 小时':'约 1 小时'}
     function dateText(){if(!state.date)return'';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${state.date}T00:00:00`))}
     function timeText(){const slot=timeSlots[state.time];return slot?`${state.time} · ${slot.start}-${slot.endNextDay?'次日 ':''}${slot.end}`:state.time}
+    function emailTimeText(){
+      const slot=timeSlots[state.time];
+      if(!slot)return'TBD';
+      return `${state.time}（${slot.start}-${slot.endNextDay?'次日 ':''}${slot.end}）`;
+    }
+    function emailPlaceText(){return state.placeMode==='self'&&state.place?state.place:'TBD'}
     function renderSummary(){document.getElementById('summary').innerHTML=`<b>这次</b>　${safe(outingProfile().name)}<br><b>时间</b>　${dateText()} ${safe(timeText())}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
-    function emailTitle(){return `${dateText()}｜${outingProfile().name}｜${timeText()}｜${durationText()}｜${state.place}`}
+    function emailTitle(){return `${dateText()}｜${outingProfile().name}｜${emailTimeText()}｜${durationText()}｜${emailPlaceText()}`}
     let emailQueue=Promise.resolve(),lastEmailRequestAt=0;
     function sendEmail(templateId,templateParams){
       emailQueue=emailQueue.catch(()=>{}).then(async()=>{
@@ -511,10 +517,10 @@
         name:config.inviterName,
         title:emailTitle(),
         date:dateText(),
-        time:timeText(),
+        time:emailTimeText(),
         outing:outingProfile().name,
         duration:durationText(),
-        place:state.place,
+        place:emailPlaceText(),
         message:`Z 已确认：${emailTitle()}`,
         ...extra
       };
