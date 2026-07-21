@@ -60,10 +60,10 @@
     .time-options.fast .time-choice:hover::after{transition-duration:.8s}
     .bubble-stage{position:relative;inset:auto;width:100%;height:0;margin:0;overflow:hidden;z-index:0;pointer-events:none;transition:height .24s ease,margin .24s ease}
     .bubble-stage.active{height:82px;margin:9px 0 5px}
-    .bubble{position:relative;display:flex;align-items:center;gap:10px;width:96%;margin-left:2%;padding:12px 14px;border:1px solid rgba(91,132,151,.24);border-radius:20px 20px 20px 7px;background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(231,244,249,.9));box-shadow:0 12px 28px rgba(57,91,107,.12);color:#456573;font-size:12.5px;line-height:1.5;opacity:0;backdrop-filter:blur(7px)}
-    .bubble::after{content:"";position:absolute;left:18px;bottom:-6px;width:12px;height:12px;border:inherit;border-width:0 0 1px 1px;background:#eef8fb;transform:rotate(-45deg)}
-    .bubble strong{margin-right:5px;color:#315f75;font-size:11px;letter-spacing:.02em}
-    .observer-mark{display:grid;flex:0 0 28px;width:28px;height:28px;place-items:center;border-radius:50%;background:#dceef5;color:#4f8198;font-size:14px;box-shadow:inset 0 0 0 1px rgba(79,129,152,.12)}
+    .bubble{--bubble-hue:198;position:relative;display:flex;align-items:center;gap:10px;width:96%;margin-left:2%;padding:12px 14px;border:1px solid hsla(var(--bubble-hue),45%,48%,.25);border-radius:20px 20px 20px 7px;background:linear-gradient(135deg,hsla(var(--bubble-hue),70%,99%,.97),hsla(var(--bubble-hue),68%,92%,.9));box-shadow:0 12px 28px hsla(var(--bubble-hue),35%,32%,.13);color:hsl(var(--bubble-hue),26%,34%);font-size:12.5px;line-height:1.5;opacity:0;backdrop-filter:blur(7px)}
+    .bubble::after{content:"";position:absolute;left:18px;bottom:-6px;width:12px;height:12px;border:inherit;border-width:0 0 1px 1px;background:hsl(var(--bubble-hue),65%,94%);transform:rotate(-45deg)}
+    .bubble strong{margin-right:5px;color:hsl(var(--bubble-hue),38%,29%);font-size:11px;letter-spacing:.02em}
+    .observer-mark{display:grid;flex:0 0 30px;width:30px;height:30px;place-items:center;border-radius:50%;background:hsla(var(--bubble-hue),65%,88%,.82);font-size:17px;box-shadow:inset 0 0 0 1px hsla(var(--bubble-hue),45%,45%,.12)}
     .bubble-stage.active .bubble{animation:observerIn 3.5s cubic-bezier(.2,.7,.25,1) both}
     @keyframes observerIn{0%{opacity:0;transform:translateY(9px) scale(.97)}16%,74%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-5px) scale(.99)}}
     .ending{text-align:center;padding:14px 0 2px}
@@ -387,18 +387,20 @@
     });
     document.getElementById('date').min=new Date().toISOString().slice(0,10);
     const timeComments={
-      '上午':['晨间观察员','清醒得有一点可疑'],
-      '中午':['菜单研究小组','本次会面已升级为一顿'],
-      '下午':['下午茶观察组','议程合理，暧昧程度待评估'],
-      '晚上':['双子座内部群聊','同意，但拒绝承认期待'],
-      '午夜':['日历本人','这已经不是咖啡局了吧'],
-      '待定':['本次行程甲方','很好，谁都没有真正做决定']
+      '上午':['晨间观察员','清醒得有一点可疑',['🌞','🥐'],43],
+      '中午':['菜单研究小组','本次会面已升级为一顿',['🍜','🥢'],24],
+      '下午':['下午茶观察组','议程合理，暧昧程度待评估',['🍰','☕️'],337],
+      '晚上':['双子座内部群聊','同意，但拒绝承认期待',['🍷','🌆'],252],
+      '午夜':['日历本人','这已经不是咖啡局了吧',['🌙','🦉'],224],
+      '待定':['本次行程甲方','很好，谁都没有真正做决定',['🎲','🫧'],158]
     };
     let hoverTimer,bubbleTimer,hasPlayedTimeComment=false,activeCommentSlot='';
     function showBubbles(slot){
       const stage=document.getElementById('bubbleStage'); stage.innerHTML='';
-      const [speaker,comment]=timeComments[slot],bubble=document.createElement('div');bubble.className='bubble observer';
-      bubble.innerHTML=`<span class="observer-mark">✦</span><span><strong>${speaker}：</strong>${comment}</span>`;
+      const [speaker,comment,emojis,hue]=timeComments[slot],bubble=document.createElement('div');bubble.className='bubble observer';
+      const emoji=emojis[Math.floor(Math.random()*emojis.length)],tint=hue+Math.floor(Math.random()*9)-4;
+      bubble.style.setProperty('--bubble-hue',tint);
+      bubble.innerHTML=`<span class="observer-mark">${emoji}</span><span><strong>${speaker}：</strong>${comment}</span>`;
       stage.appendChild(bubble);
       stage.classList.remove('active'); void stage.offsetWidth; stage.classList.add('active');
       activeCommentSlot=slot;
