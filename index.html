@@ -141,8 +141,10 @@
     .time-choice:hover{transform:translate(var(--mx,0),var(--my,0));background:rgba(255,255,255,.7)}
     .time-choice.active{background:#ddecf3;border-color:#78a4b8;box-shadow:none}
     #dateField{max-width:280px}
+    #exactTimeField{max-width:280px}
     .field-hint,.time-gate{display:block;margin:7px 0 0;color:#80909a;font-size:11px;line-height:1.5}
     .time-gate{margin:0 0 9px;color:#658291}
+    #exactTimeField:not(.hidden){animation:softIn .32s ease both}
     .outing-preview{min-height:24px;margin:13px 0 0;color:#58778a;font-size:13px;line-height:1.55;opacity:0;transform:translateY(5px);transition:opacity .3s ease,transform .3s ease}
     .outing-preview.show{opacity:1;transform:none}
     .primary{width:auto;min-width:210px;border-radius:999px;padding:15px 26px;background:#344b58;border-color:#344b58;transform:translate(var(--mx,0),var(--my,0));transition:transform .18s ease,background .2s ease}
@@ -169,6 +171,7 @@
       h1{font-size:clamp(45px,14vw,72px)}
       .two{grid-template-columns:1fr}
       #dateField{max-width:none}
+      #exactTimeField{max-width:none}
       .time-options{grid-template-columns:repeat(3,1fr)}
       .primary{width:100%}
       .bubble{font-size:12px}
@@ -218,6 +221,7 @@
           <div class="field" id="dateField"><label for="date">先选日期</label><input id="date" type="date"><small class="field-hint">过去的日期不可选</small></div>
           <div class="field"><label>再选大概时间</label><p class="time-gate" id="timeGate">选好日期后，时段会自动解锁</p><div class="time-options" id="timeOptions" aria-label="大概什么时间"><button class="time-choice" data-time="上午"><span>上午</span><small>08:00-11:00</small></button><button class="time-choice" data-time="中午"><span>中午</span><small>11:30-13:30</small></button><button class="time-choice" data-time="下午"><span>下午</span><small>14:00-17:00</small></button><button class="time-choice" data-time="晚上"><span>晚上</span><small>18:00-22:00</small></button><button class="time-choice" data-time="午夜"><span>午夜</span><small>23:00-次日 01:00</small></button><button class="time-choice" data-time="待定"><span>待定</span><small>保留一点悬念</small></button></div><p class="outing-preview" id="outingPreview" aria-live="polite"></p><div class="bubble-stage" id="bubbleStage" aria-live="polite"></div></div>
         </div>
+        <div class="field hidden" id="exactTimeField"><label for="exactTime">具体几点（可选）</label><select id="exactTime"></select><small class="field-hint">每 15 分钟一档；不选也没关系</small></div>
         <div class="field">
           <label for="duration">您想为这次见面留多久？</label>
           <select id="duration">
@@ -305,7 +309,7 @@
         hostTemplateId:'template_vozvyma',guestTemplateId:'template_5nq7qkr'
       }
     };
-    const state={date:'',time:'',duration:'60',placeMode:'',place:''};
+    const state={date:'',time:'',exactTime:'',duration:'60',placeMode:'',place:''};
     const timeSlots={
       '上午':{start:'08:00',end:'11:00'},
       '中午':{start:'11:30',end:'13:30'},
@@ -425,13 +429,36 @@
       clearTimeout(bubbleTimer);
       activeCommentSlot='';const stage=document.getElementById('bubbleStage');stage.classList.remove('active');stage.innerHTML='';
     }
+    const exactTimeField=document.getElementById('exactTimeField'),exactTimeSelect=document.getElementById('exactTime');
+    function clockMinutes(value){const [hour,minute]=value.split(':').map(Number);return hour*60+minute}
+    function clockText(totalMinutes){
+      const minutes=(totalMinutes+1440)%1440;
+      return `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
+    }
+    function exactTimeDisplay(){
+      if(!state.exactTime)return'';
+      const slot=timeSlots[state.time],isNextDay=slot?.endNextDay&&clockMinutes(state.exactTime)<clockMinutes(slot.start);
+      return `${isNextDay?'次日 ':''}${state.exactTime}`;
+    }
+    function renderExactTimeOptions(){
+      const slot=timeSlots[state.time];state.exactTime='';exactTimeSelect.innerHTML='';
+      if(!slot){exactTimeField.classList.add('hidden');return}
+      const defaultOption=document.createElement('option');defaultOption.value='';defaultOption.textContent=`不指定，保留${state.time}时段`;exactTimeSelect.appendChild(defaultOption);
+      const start=clockMinutes(slot.start),rawEnd=clockMinutes(slot.end),end=slot.endNextDay&&rawEnd<=start?rawEnd+1440:rawEnd;
+      for(let minute=start;minute<end;minute+=15){
+        const option=document.createElement('option'),value=clockText(minute);
+        option.value=value;option.textContent=`${minute>=1440?'次日 ':''}${value}`;exactTimeSelect.appendChild(option);
+      }
+      exactTimeField.classList.remove('hidden');
+    }
+    exactTimeSelect.addEventListener('change',()=>{state.exactTime=exactTimeSelect.value});
     function syncDateGate(){
       if(dateInput.value&&dateInput.value<dateInput.min)dateInput.value='';
       const hasValidDate=Boolean(dateInput.value&&dateInput.value>=dateInput.min);
       timeChoiceButtons.forEach(button=>button.disabled=!hasValidDate);
       document.getElementById('timeGate').classList.toggle('hidden',hasValidDate);
       if(!hasValidDate&&state.time){
-        state.time='';timeChoiceButtons.forEach(button=>button.classList.remove('active'));
+        state.time='';state.exactTime='';exactTimeField.classList.add('hidden');timeChoiceButtons.forEach(button=>button.classList.remove('active'));
         const preview=document.getElementById('outingPreview');preview.textContent='';preview.classList.remove('show');clearBubbles();
       }
     }
@@ -450,7 +477,9 @@
       });
       button.addEventListener('click',()=>{
         clearTimeout(hoverTimer);
+        const slotChanged=state.time!==button.dataset.time;
         state.time=button.dataset.time;
+        if(slotChanged)renderExactTimeOptions();
         timeChoiceButtons.forEach(item=>item.classList.toggle('active',item===button));
         const profile=outingProfile(),preview=document.getElementById('outingPreview');
         preview.textContent=profile.preview;preview.classList.add('show');
@@ -479,11 +508,16 @@
     function safe(value){const div=document.createElement('div');div.textContent=value;return div.innerHTML}
     function durationText(){return state.duration==='open'?'不设结束时间，看情况':state.duration==='120'?'约 2 小时':'约 1 小时'}
     function dateText(){if(!state.date)return'';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${state.date}T00:00:00`))}
-    function timeText(){const slot=timeSlots[state.time];return slot?`${state.time} · ${slot.start}-${slot.endNextDay?'次日 ':''}${slot.end}`:state.time}
+    function slotRangeText(){const slot=timeSlots[state.time];return slot?`${slot.start}-${slot.endNextDay?'次日 ':''}${slot.end}`:''}
+    function timeText(){
+      const slot=timeSlots[state.time];
+      if(!slot)return state.time;
+      return state.exactTime?`${state.time} · ${exactTimeDisplay()}`:`${state.time}（${slotRangeText()}）`;
+    }
     function emailTimeText(){
       const slot=timeSlots[state.time];
       if(!slot)return'TBD';
-      return `${state.time}（${slot.start}-${slot.endNextDay?'次日 ':''}${slot.end}）`;
+      return timeText();
     }
     function emailPlaceText(){return state.placeMode==='self'&&state.place?state.place:'TBD'}
     function renderSummary(){document.getElementById('summary').innerHTML=`<b>这次</b>　${safe(outingProfile().name)}<br><b>时间</b>　${dateText()} ${safe(timeText())}<br><b>时长</b>　${durationText()}<br><b>地点</b>　${safe(state.place)}`}
@@ -557,12 +591,15 @@
     function icsTimestamp(){return new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z')}
     function escapeIcs(value){return String(value).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n')}
     function timedIcsRange(){
-      const slot=timeSlots[state.time];if(!slot)return null;
-      const [year,month,day]=state.date.split('-').map(Number),[startHour,startMinute]=slot.start.split(':').map(Number);
+      const slot=timeSlots[state.time];if(!slot||!state.exactTime)return null;
+      const [year,month,day]=state.date.split('-').map(Number),[startHour,startMinute]=state.exactTime.split(':').map(Number);
       const start=new Date(year,month-1,day,startHour,startMinute),end=new Date(start);
+      if(slot.endNextDay&&clockMinutes(state.exactTime)<clockMinutes(slot.start)){
+        start.setDate(start.getDate()+1);end.setDate(end.getDate()+1);
+      }
       if(state.duration==='open'){
         const [endHour,endMinute]=slot.end.split(':').map(Number);
-        end.setHours(endHour,endMinute,0,0);if(slot.endNextDay)end.setDate(end.getDate()+1);
+        end.setFullYear(year,month-1,day);end.setHours(endHour,endMinute,0,0);if(slot.endNextDay)end.setDate(end.getDate()+1);
       }else end.setMinutes(end.getMinutes()+Number(state.duration));
       const format=date=>`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}T${String(date.getHours()).padStart(2,'0')}${String(date.getMinutes()).padStart(2,'0')}00`;
       return {start:format(start),end:format(end)};
@@ -619,5 +656,8 @@
     document.getElementById('downloadIcs').onclick=downloadInvite;
     renderTitle(titles[0][0]);
   </script>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"c45485ac404849c282d7f47b7959835a"}'></script>
+  <!-- End Cloudflare Web Analytics -->
 </body>
 </html>
