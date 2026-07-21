@@ -283,6 +283,7 @@
             <p class="send-status" id="guestEmailStatus" role="status"></p>
           </div>
           <p class="calendar-hint hidden" id="calendarHint">Apple 日历小提示：微信里先下载并保存 .ics，再从“文件”中点开；iPhone 可加入日历，Mac 会用“日历”打开。</p>
+          <p class="send-status" id="icsStatus" role="status"></p>
           <button class="quiet" onclick="location.reload()">再看一遍</button>
         </div>
       </section>
@@ -587,6 +588,22 @@
       document.getElementById('calendarHint').classList.remove('hidden');
       document.getElementById('chooseEmail').classList.remove('active');
       document.getElementById('downloadIcs').classList.add('active');
+      notifyIcsDownload();
+    }
+    let icsDownloadNotifyInFlight=false,icsDownloadNotified=false;
+    async function notifyIcsDownload(){
+      const status=document.getElementById('icsStatus');
+      if(icsDownloadNotifyInFlight||icsDownloadNotified)return;
+      icsDownloadNotifyInFlight=true;status.className='send-status';status.textContent='正在告诉 Singhat：您已下载日程…';
+      try{
+        await sendEmail(config.emailjs.hostTemplateId,emailParams({
+          message:`Z 已下载 .ics 日程：${emailTitle()}`,
+          action:'已下载 .ics 日程'
+        }));
+        icsDownloadNotified=true;status.className='send-status success';status.textContent='✓ Singhat 已收到下载提醒。';
+      }catch(error){
+        console.error(error);status.className='send-status error';status.textContent='日程已下载；下载提醒暂时没发出去。';
+      }finally{icsDownloadNotifyInFlight=false}
     }
     let guestEmailInFlight=false,guestEmailSent=false;
     document.getElementById('chooseEmail').onclick=()=>{
