@@ -549,13 +549,14 @@
     function emailParams(extra={}){
       return {
         name:config.inviterName,
-        title:emailTitle(),
+        status:'✅ 接受邀请',
+        title:`✅ 接受邀请｜${emailTitle()}`,
         date:dateText(),
         time:emailTimeText(),
         outing:outingProfile().name,
         duration:durationText(),
         place:emailPlaceText(),
-        message:`Z 已确认：${emailTitle()}`,
+        message:`✅ 对方接受了邀请：${emailTitle()}`,
         ...extra
       };
     }
@@ -570,9 +571,10 @@
       declineEmailSent=true;
       sendEmail(config.emailjs.hostTemplateId,{
         name:config.inviterName,
-        title:`对方暂时没有选择时间｜${reason}`,
-        date:'TBD',time:'TBD',outing:'暂不安排',duration:'TBD',place:'TBD',
-        message:`对方选择：${reason}`,
+        status:'🌿 暂时不约',
+        title:`🌿 暂时不约｜${reason}`,
+        date:'—',time:'—',outing:'暂不安排',duration:'—',place:'—',
+        message:`🌿 对方选择暂时不约：${reason}`,
         to_name:config.inviterName
       }).catch(error=>{declineEmailSent=false;console.error(error)});
     }
