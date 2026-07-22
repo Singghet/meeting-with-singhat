@@ -193,20 +193,20 @@
         <span id="sceneLabel">先听我说</span>
       </div>
       <div class="kicker">有件小事</div>
-      <h1 id="pageTitle">有件不太紧急，<br>但想认真问您的事。</h1>
+      <h1 id="pageTitle">有件不太紧急，<br>但想认真问您的事儿，</h1>
       <p class="lead" id="pageLead">不会占用很久，大概只需要一点好奇心。</p>
       <div class="progress" aria-label="进度"><span class="on"></span><span></span><span></span><span></span><span></span></div>
       <section class="scene active" data-step="0">
         <p class="question">可以先听我说说嘛？</p>
         <div class="options">
-          <button class="option" data-go="1">好，您问</button>
+          <button class="option" data-go="1">好，您说</button>
           <button class="option" data-dialog="guess">我大概猜到了</button>
           <button class="option" data-dialog="type">先说是什么类型的事</button>
         </div>
       </section>
 
       <section class="scene" data-step="1">
-        <p class="question">想找个时间，约您出来，可以嘛？</p>
+        <p class="question">想找个时间，约您可以嘛？</p>
         <div class="options">
           <button class="option" data-go="2">可以呀</button>
           <button class="option" data-dialog="busy">最近有点忙</button>
@@ -303,7 +303,6 @@
   <script>
     const config={
       inviterName:'Singhat',
-      hostEmail:'1250921314@qq.com',
       emailjs:{
         publicKey:'Lk-X17zSnfT3gcQNa',serviceId:'service_ws6khg9',
         hostTemplateId:'template_vozvyma',guestTemplateId:'template_5nq7qkr'
@@ -328,7 +327,7 @@
     };
     const sceneLabels=['先听我说','问个问题','选个时间','选个地方','确认一下','到时候见','下次再说'];
     const titles=[
-      ['有件不太紧急，<br>但想认真问您的事。','不会占用很久，大概只需要一点好奇心。'],
+      ['有件不太紧急，<br>但想认真问您的事儿，','不会占用很久，大概只需要一点好奇心。'],
       ['那我就直接问啦。',''],['时间由您来定。',''],['再决定一个地方。',''],['最后确认一下。',''],['',''],['','']
     ];
     const dialogs={
@@ -387,6 +386,7 @@
         button.onclick=()=>{
           if(placeMode==='host'){state.placeMode='host';state.place='TBD by Singhat';renderSummary()}
           if(placeMode==='self'){showPlaceInput();modal.classList.remove('show');return}
+          if(target===6)notifyDecline(label);
           modal.classList.remove('show'); if(target!==null)go(target);
         };
         actions.appendChild(button);
@@ -561,10 +561,20 @@
     }
     function sendSelectionEmail(){
       return sendEmail(config.emailjs.hostTemplateId,emailParams({
-        to_email:config.hostEmail,
-        email:config.hostEmail,
         to_name:config.inviterName
       }));
+    }
+    let declineEmailSent=false;
+    function notifyDecline(reason){
+      if(declineEmailSent)return;
+      declineEmailSent=true;
+      sendEmail(config.emailjs.hostTemplateId,{
+        name:config.inviterName,
+        title:`对方暂时没有选择时间｜${reason}`,
+        date:'TBD',time:'TBD',outing:'暂不安排',duration:'TBD',place:'TBD',
+        message:`对方选择：${reason}`,
+        to_name:config.inviterName
+      }).catch(error=>{declineEmailSent=false;console.error(error)});
     }
     let emailSendInFlight=false,emailSent=false;
     async function notifySelection(){
